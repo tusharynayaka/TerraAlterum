@@ -1,3 +1,18 @@
+"""This python file is a stand-alone script that sends one fixed SMS message using Twilio when the file is run.
+
+It is basically a test script to confirm that:
+
+your Twilio SID + Token are correct
+
+your Messaging Service SID works
+
+your “from number” works
+
+Twilio can deliver SMS to your target mobile number
+
+Twilio library is installed
+
+The credentials are valid"""
 import json
 import sys
 
@@ -85,3 +100,4 @@ except Exception as e:
         'details': str(e)
     }))
     sys.exit(6)
+
