@@ -1,3 +1,13 @@
+"""This Python file creates a Flask server with two API endpoints:
+
+✔ /send-sms → Send SMS using Twilio
+✔ /make-call → Make voice call with text-to-speech
+✔ Uses your Twilio SID, Auth Token, Messaging Service, and Phone Number
+✔ Handles errors safely
+✔ Supports CORS so you can call from your HTML/JS frontend
+✔ Runs on port 5001
+
+This is the backend you connect to your disaster alert website."""
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -174,3 +184,4 @@ if __name__ == '__main__':
     print('Using From Number:', bool(TWILIO_FROM_NUMBER))
     print('='*60 + '\n')
     app.run(debug=True, port=5001)
+
