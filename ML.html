@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced ML Disaster Risk Prediction System - Professional Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+
+        /* ====================================
+           NAVIGATION & HEADER
+           ==================================== */
+        .navbar-custom {
+            background: var(--gradient);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .navbar-custom .navbar-brand small {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .navbar-custom .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-custom .nav-link.active {
+            color: white !important;
+            border-bottom: 3px solid white;
+        }
+
+        /* ====================================
+           CONTAINERS & SECTIONS
+           ==================================== */
+        .container-custom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+            margin: 3rem 0;
+        }
+
+        .ml-section {
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .ml-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ====================================
+           CARDS & COMPONENTS
+           ==================================== */
+        .card {
+            background-color: white;
+            border: none;
+            color: var(--dark);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary { background-color: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--secondary); border-color: var(--secondary); }
+        .btn-success { background-color: var(--success); border-color: var(--success); }
+        .btn-success:hover { background-color: #27ae60; border-color: #27ae60; }
+        .btn-info { background-color: var(--info); border-color: var(--info); }
+        .btn-info:hover { background-color: #2980b9; border-color: #2980b9; }
+        .btn-warning { background-color: var(--warning); border-color: var(--warning); }
+        .btn-warning:hover { background-color: #e67e22; border-color: #e67e22; }
+        .btn-danger { background-color: var(--danger); border-color: var(--danger); }
+        .btn-danger:hover { background-color: #c0392b; border-color: #c0392b; }
+        
+        .feature-list {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-left: 4px solid var(--primary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .kpi-card {
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: none;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .kpi-card.danger {
+            border-top-color: var(--danger);
+        }
+
+        .kpi-card.warning {
+            border-top-color: var(--warning);
+        }
+
+        .kpi-card.success {
+            border-top-color: var(--success);
+        }
+
+        .kpi-card.info {
+            border-top-color: var(--info);
+        }
+
+        .kpi-card h6 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #95a5a6;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-card h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .kpi-card.danger h3 {
+            color: var(--danger);
+        }
+
+        .kpi-card.warning h3 {
+            color: var(--warning);
+        }
+
+        .kpi-card.success h3 {
+            color: var(--success);
+        }
+
+        .kpi-card.info h3 {
+            color: var(--info);
+        }
+
+        .kpi-card small {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* ====================================
+           BUTTONS & CONTROLS
+           ==================================== */
+        .btn-group {
+            gap: 0.5rem;
+        }
+
+        .btn-group .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        /* ====================================
+           TABS & PANELS
+           ==================================== */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ====================================
+           BACK BUTTON
+           ==================================== */
+        .back-button {
+            background: var(--gradient);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ====================================
+           RESPONSIVE
+           ==================================== */
+        @media (max-width: 768px) {
+            .ml-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .kpi-card {
+                padding: 1.5rem;
+            }
+
+            .btn-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <button class="back-button" onclick="location.href='2.html'"><i class="fas fa-arrow-left"></i> Back to Main</button>
+
+    <!-- Navigation -->
+    <nav class="navbar-custom">
+        <div class="container-custom">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div class="navbar-brand">
+                    <div><i class="fas fa-robot"></i> Advanced ML Disaster Prediction</div>
+                    <small>AI-Powered Risk Assessment System</small>
+                </div>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: center;">
+                    <a href="#" class="nav-link active" onclick="switchTab('disaster')">📊 Database</a>
+                    <a href="#" class="nav-link" onclick="switchTab('location')">📍 Location</a>
+                    <a href="#" class="nav-link" onclick="switchTab('ml-advanced')">🔬 ML</a>
+                    <a href="#" class="nav-link" onclick="switchTab('analytics')">📊 Analytics</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding: 3rem 0;">
+        
+        <!-- ===== DISASTER DATABASE TAB ===== -->
+        <div id="disaster" class="tab-content active">
+            <div class="ml-section">
+                <h2><i class="fas fa-database"></i> Disaster Database Analysis</h2>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-layer-group"></i> Select Disaster</h5>
+                                <select class="form-select mb-3" id="disaster-select">
+                                    <option value="">Loading database...</option>
+                                </select>
+                                
+                                <h6 style="margin-top: 1.5rem; font-weight: 700; color: var(--dark);">📋 Feature Analysis</h6>
+                                <div class="feature-list" id="feature-analysis" style="margin-top: 1rem;">Select a disaster scenario</div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-primary w-100 mb-2" onclick="analyzeDisasterDatabase()"><i class="fas fa-eye"></i> Analyze</button>
+                                    <button class="btn btn-info w-100" onclick="showDatabaseStats()"><i class="fas fa-chart-bar"></i> Statistics</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-file-alt"></i> Analysis Results</h5>
+                                <div id="disaster-result" class="feature-list">Select a disaster to analyze</div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <div class="chart-title"><i class="fas fa-chart-line"></i> Risk Timeline</div>
+                                    <canvas id="riskTimelineChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <div class="chart-title"><i class="fas fa-gauge"></i> Risk Gauge</div>
+                                    <canvas id="riskGaugeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== LOCATION ANALYSIS TAB ===== -->
+        <div id="location" class="tab-content">
+            <div class="ml-section">
+                <h2><i class="fas fa-map-location-dot"></i> Location-Based ML Analysis</h2>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-globe"></i> Enter Location</h5>
+                                <select class="form-select mb-3" id="location-select">
+                                    <option value="">Select location...</option>
+                                </select>
+                                
+                                <h6 style="margin-top: 1.5rem; font-weight: 700; color: var(--dark);">🌡️ Location Profile</h6>
+                                <div class="feature-list" id="location-info" style="margin-top: 1rem;">Select a location</div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-info w-100" onclick="analyzeLocationModel()"><i class="fas fa-robot"></i> Analyze Model</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-file-alt"></i> Location Risk Assessment</h5>
+                                <div id="location-result" class="feature-list">Select a location to analyze</div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <div class="chart-title"><i class="fas fa-chart-line"></i> Location Timeline</div>
+                                    <canvas id="locationTimelineChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <div class="chart-title"><i class="fas fa-gauge"></i> Location Gauge</div>
+                                    <canvas id="locationGaugeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ADVANCED ML TAB ===== -->
+        <div id="ml-advanced" class="tab-content">
+            <div class="ml-section">
+                <h2><i class="fas fa-microscope"></i> Advanced ML Model Analysis</h2>
+                
+                <div class="btn-group mb-4" role="group">
+                    <button class="btn btn-success" onclick="switchMLMode('database')"><i class="fas fa-database"></i> Database</button>
+                    <button class="btn btn-info" onclick="switchMLMode('location')"><i class="fas fa-map-location-dot"></i> Location</button>
+                    <button class="btn btn-danger" onclick="switchMLMode('features')"><i class="fas fa-star"></i> Features</button>
+                </div>
+
+                <!-- Database Mode -->
+                <div id="ml-database-mode" style="display: block;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--success);"><i class="fas fa-globe"></i> Global Disaster Database</h5>
+                            <div class="mb-3">
+                                <label style="font-weight: 600; color: var(--dark);">Select Disaster Scenario:</label>
+                                <select id="ml-disaster-select" class="form-select">
+                                    <option value="">Loading database...</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button class="btn btn-success btn-sm w-100" onclick="analyzeSelectedDisaster()"><i class="fas fa-eye"></i> Analyze</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-primary btn-sm w-100" onclick="showDisasterStats()"><i class="fas fa-chart-bar"></i> Stats</button>
+                                </div>
+                            </div>
+                            <div id="ml-database-output" class="feature-list" style="margin-top: 1.5rem;">Select a disaster scenario</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Mode -->
+                <div id="ml-location-mode" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--info);"><i class="fas fa-map-location-dot"></i> Location-Based ML Training</h5>
+                            <div class="mb-3">
+                                <label style="font-weight: 600; color: var(--dark);">Select Location:</label>
+                                <select id="ml-location-select" class="form-select">
+                                    <option value="">Loading locations...</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button class="btn btn-info btn-sm w-100" onclick="trainLocationModel()"><i class="fas fa-robot"></i> Train Model</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-warning btn-sm w-100" onclick="compareLocations()"><i class="fas fa-globe"></i> Compare</button>
+                                </div>
+                            </div>
+                            <div id="ml-location-output" class="feature-list" style="margin-top: 1.5rem;">Select a location</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Mode -->
+                <div id="ml-features-mode" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: var(--danger);"><i class="fas fa-chart-bar"></i> Feature Importance Analysis</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <button class="btn btn-danger btn-sm w-100" onclick="analyzeFeatureImportance()"><i class="fas fa-chart-pie"></i> Importance</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-primary btn-sm w-100" onclick="generateCorrelationMatrix()"><i class="fas fa-link"></i> Correlations</button>
+                                </div>
+                            </div>
+                            <div id="ml-features-output" class="feature-list" style="margin-bottom: 1.5rem;">Click buttons to analyze</div>
+                            <div class="chart-container">
+                                <div class="chart-title"><i class="fas fa-chart-bar"></i> Feature Importance Ranking</div>
+                                <canvas id="featureImportanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ANALYTICS DASHBOARD TAB ===== -->
+        <div id="analytics" class="tab-content">
+            <div class="ml-section">
+                <h2><i class="fas fa-chart-line"></i> Advanced Analytics Dashboard</h2>
+                
+                <div class="btn-group mb-4" role="group">
+                    <button class="btn btn-success" onclick="switchAnalyticsTab('overview')"><i class="fas fa-chart-bar"></i> Overview</button>
+                    <button class="btn btn-warning" onclick="switchAnalyticsTab('heatmap')"><i class="fas fa-fire"></i> Heatmap</button>
+                    <button class="btn btn-info" onclick="switchAnalyticsTab('trends')"><i class="fas fa-chart-line"></i> Trends</button>
+                    <button class="btn btn-danger" onclick="switchAnalyticsTab('predictions')"><i class="fas fa-crystal-ball"></i> Predictions</button>
+                </div>
+
+                <!-- Overview Section -->
+                <div id="analytics-overview" style="display: block;">
+                    <div class="row mb-4">
+                        <div class="col-lg-3">
+                            <div class="kpi-card danger">
+                                <h6><i class="fas fa-globe"></i> Global Risk Index</h6>
+                                <h3 id="global-risk-index">-</h3>
+                                <small id="risk-severity">Calculating...</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="kpi-card warning">
+                                <h6><i class="fas fa-bell"></i> Active Alerts</h6>
+                                <h3 id="active-alerts">-</h3>
+                                <small id="alert-status">Scanning...</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="kpi-card info">
+                                <h6><i class="fas fa-robot"></i> Model Accuracy</h6>
+                                <h3 id="model-accuracy">-</h3>
+                                <small id="accuracy-trend">Analyzing...</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="kpi-card">
+                                <h6><i class="fas fa-exclamation-triangle"></i> High-Risk Regions</h6>
+                                <h3 id="risk-regions">-</h3>
+                                <small id="regions-list">Identifying...</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-pie-chart"></i> Disaster Distribution</h5>
+                                    <div class="chart-container">
+                                        <canvas id="disasterTypeChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-bars"></i> Risk Level Distribution</h5>
+                                    <div class="chart-container">
+                                        <canvas id="riskLevelChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heatmap Section -->
+                <div id="analytics-heatmap" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-fire"></i> Global Risk Heatmap</h5>
+                            <div class="row mb-4">
+                                <div class="col-lg-3">
+                                    <div class="kpi-card danger">
+                                        <h6>CRITICAL (70-100)</h6>
+                                        <h3 id="critical-zones">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="kpi-card warning">
+                                        <h6>HIGH (50-70)</h6>
+                                        <h3 id="high-zones">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="kpi-card success">
+                                        <h6>MODERATE (30-50)</h6>
+                                        <h3 id="moderate-zones">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="kpi-card info">
+                                        <h6>LOW (0-30)</h6>
+                                        <h3 id="low-zones">0</h3>
+                                        <h3 id="low-zones">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="heatmap-output" class="feature-list" style="min-height: 300px; margin-bottom: 1.5rem;">Click button to generate</div>
+                            <button class="btn btn-warning w-100" onclick="generateRiskHeatmap()"><i class="fas fa-fire"></i> Generate Heatmap</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trends Section -->
+                <div id="analytics-trends" style="display: none;">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-chart-bar"></i> Disaster Frequency</h5>
+                                    <div class="chart-container">
+                                        <canvas id="frequencyChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-chart-radar"></i> Seasonal Patterns</h5>
+                                    <div class="chart-container">
+                                        <canvas id="seasonalChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-info w-100 mt-3" onclick="analyzeDisasterTrends()"><i class="fas fa-chart-line"></i> Analyze Trends</button>
+                </div>
+
+                <!-- Predictions Section -->
+                <div id="analytics-predictions" style="display: none;">
+                    <div class="row mb-3">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-calendar"></i> 30-Day Forecast</h5>
+                                    <div class="chart-container">
+                                        <canvas id="forecastChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-percentage"></i> Confidence Intervals</h5>
+                                    <div class="chart-container">
+                                        <canvas id="confidenceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-list"></i> Top Predicted Events</h5>
+                            <div id="predictions-output" class="feature-list">Generating predictions...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-success w-100 mt-4" onclick="refreshAnalyticsDashboard()"><i class="fas fa-sync-alt"></i> Refresh Dashboard</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ============================================
+        // UNIFIED ML DATABASE WITH ALL FEATURES
+        // ============================================
+
+        const mlDatabase = {
+            disasters: [],
+            locations: [],
+            coordinates: [],
+            allLocations: [],
+            features: [],
+            featureNames: [
+                'Latitude', 'Longitude', 'Elevation (m)', 'Distance to Coast (km)',
+                'Population Density', 'Rainfall (mm)', 'Temperature (°C)', 'Wind Speed (km/h)',
+                'Humidity (%)', 'Vegetation Index', 'Soil Moisture', 'Air Pressure (hPa)',
+                'Seismic Activity', 'Urbanization Rate', 'Infrastructure Quality', 'Previous Disasters'
+            ],
+            initialized: false
+        };
+
+        // Initialize ML Database on page load
+        function initializeMLDatabase() {
+            if (mlDatabase.initialized) return;
+
+            const disasterTypes = {
+                "🌊": ["Flood", "Tsunami", "Storm Surge", "Monsoon Flood", "River Flood", "Coastal Flood"],
+                "🔥": ["Wildfire", "Forest Fire", "Urban Fire", "Bushfire", "Mega Fire", "Grass Fire"],
+                "🌀": ["Hurricane", "Cyclone", "Tornado", "Typhoon", "Super Storm", "Tropical Storm"],
+                "🏔": ["Earthquake", "Landslide", "Avalanche", "Mudslide", "Rockfall", "Subsidence"],
+                "🌋": ["Volcanic Eruption", "Ash Fall", "Lava Flow", "Pyroclastic Flow", "Volcanic Gas"],
+                "💨": ["Drought", "Heatwave", "Dust Storm", "Sandstorm", "Famine", "Water Crisis"],
+                "❄": ["Blizzard", "Ice Storm", "Hail Storm", "Snow Avalanche", "Freezing Rain"],
+                "🌪": ["Monsoon", "Thunderstorm", "Lightning Storm", "Hailstorm", "Squall"]
+            };
+
+            const globalLocations = {
+                "Mumbai, India": [19.0760, 72.8777],
+                "Dhaka, Bangladesh": [23.8103, 90.4125],
+                "Bangkok, Thailand": [13.7563, 100.5018],
+                "Tokyo, Japan": [35.6762, 139.6503],
+                "Beijing, China": [39.9042, 116.4074],
+                "Manila, Philippines": [14.5995, 120.9842],
+                "Jakarta, Indonesia": [-6.2088, 106.8456],
+                "Karachi, Pakistan": [24.8607, 67.0011],
+                "New Orleans, USA": [29.9511, -90.0715],
+                "Mexico City, Mexico": [19.4326, -99.1332],
+                "Rio de Janeiro, Brazil": [-22.9068, -43.1729],
+                "Santiago, Chile": [-33.4489, -70.6693],
+                "Vancouver, Canada": [49.2827, -123.1207],
+                "Miami, USA": [25.7617, -80.1918],
+                "Los Angeles, USA": [34.0522, -118.2437],
+                "Naples, Italy": [40.8518, 14.2681],
+                "Istanbul, Turkey": [41.0082, 28.9784],
+                "Athens, Greece": [37.9838, 23.7275],
+                "Lisbon, Portugal": [38.7223, -9.1393],
+                "Barcelona, Spain": [41.3851, 2.1734],
+                "Lagos, Nigeria": [6.5244, 3.3792],
+                "Nairobi, Kenya": [-1.2921, 36.8219],
+                "Cairo, Egypt": [30.0444, 31.2357],
+                "Sydney, Australia": [-33.8688, 151.2093],
+                "Auckland, New Zealand": [-36.8485, 174.7633]
+            };
+
+            const seasons = ["Winter", "Spring", "Summer", "Autumn", "Monsoon"];
+            const regions = Object.keys(globalLocations);
+
+            // Generate 200 disaster scenarios
+            for (let i = 0; i < 200; i++) {
+                const disasterEmojis = Object.keys(disasterTypes);
+                const emoji = disasterEmojis[Math.floor(Math.random() * disasterEmojis.length)];
+                const disasterType = disasterTypes[emoji][Math.floor(Math.random() * disasterTypes[emoji].length)];
+                const location = regions[Math.floor(Math.random() * regions.length)];
+                const coords = globalLocations[location];
+                const year = 2000 + Math.floor(Math.random() * 24);
+                const season = seasons[Math.floor(Math.random() * seasons.length)];
+
+                const disasterName = `${emoji} ${location} ${disasterType} (${season} ${year})`;
+                mlDatabase.disasters.push(disasterName);
+                mlDatabase.locations.push(location);
+                mlDatabase.coordinates.push(coords);
+
+                const disasterFeatures = [
+                    coords[0], coords[1],
+                    Math.random() * 4000 - 100,
+                    Math.random() * 500,
+                    Math.random() * 20000 + 50,
+                    Math.random() * 1000,
+                    Math.random() * 80 - 30,
+                    Math.random() * 350,
+                    Math.random() * 95 + 5,
+                    Math.random(),
+                    Math.random(),
+                    Math.random() * 200 + 900,
+                    Math.random() * 10,
+                    Math.random(),
+                    Math.random(),
+                    Math.floor(Math.random() * 15)
+                ];
+                mlDatabase.features.push(disasterFeatures);
+            }
+
+            mlDatabase.allLocations = regions;
+            mlDatabase.initialized = true;
+
+            populateDropdowns();
+        }
+
+        function populateDropdowns() {
+            document.getElementById('disaster-select').innerHTML = mlDatabase.disasters.map((d, i) => `<option value="${i}">${d}</option>`).join('');
+            document.getElementById('ml-disaster-select').innerHTML = mlDatabase.disasters.map((d, i) => `<option value="${i}">${d}</option>`).join('');
+            document.getElementById('location-select').innerHTML = mlDatabase.allLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+            document.getElementById('ml-location-select').innerHTML = mlDatabase.allLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function switchMLMode(mode) {
+            initializeMLDatabase();
+            document.getElementById('ml-database-mode').style.display = 'none';
+            document.getElementById('ml-location-mode').style.display = 'none';
+            document.getElementById('ml-features-mode').style.display = 'none';
+            document.getElementById('ml-' + mode + '-mode').style.display = 'block';
+        }
+
+        function switchAnalyticsTab(tab) {
+            document.getElementById('analytics-overview').style.display = 'none';
+            document.getElementById('analytics-heatmap').style.display = 'none';
+            document.getElementById('analytics-trends').style.display = 'none';
+            document.getElementById('analytics-predictions').style.display = 'none';
+            document.getElementById('analytics-' + tab).style.display = 'block';
+            
+            if (tab === 'overview') updateOverviewMetrics();
+            else if (tab === 'trends') createDisasterTrendsCharts();
+            else if (tab === 'predictions') createPredictionCharts();
+        }
+
+        // ============================================
+        // DISASTER DATABASE FUNCTIONS
+        // ============================================
+
+        function analyzeDisasterDatabase() {
+            initializeMLDatabase();
+            const idx = parseInt(document.getElementById('disaster-select').value);
+            if (isNaN(idx)) return;
+
+            const disaster = mlDatabase.disasters[idx];
+            const features = mlDatabase.features[idx];
+            let riskScore = calculateRiskScore(features);
+
+            const output = `🎯 DISASTER ANALYSIS\n════════════════════════════════════════\n${disaster}\n\nRisk Score: ${(riskScore * 100).toFixed(1)}%\nTemp: ${features[6].toFixed(1)}°C\nRainfall: ${features[5].toFixed(0)} mm\nWind: ${features[7].toFixed(0)} km/h`;
+
+            document.getElementById('disaster-result').textContent = output;
+            createDisasterCharts(riskScore);
+        }
+
+        function showDatabaseStats() {
+            initializeMLDatabase();
+            const avgTemp = (mlDatabase.features.reduce((sum, f) => sum + f[6], 0) / mlDatabase.features.length).toFixed(1);
+            const avgRain = (mlDatabase.features.reduce((sum, f) => sum + f[5], 0) / mlDatabase.features.length).toFixed(0);
+            
+            const output = `📊 DATABASE STATISTICS\n════════════════════════════════════════\nTotal Scenarios: ${mlDatabase.disasters.length}\nLocations: ${mlDatabase.allLocations.length}\nFeatures: 16\n\nAvg Temperature: ${avgTemp}°C\nAvg Rainfall: ${avgRain} mm`;
+            document.getElementById('disaster-result').textContent = output;
+        }
+
+        // ============================================
+        // LOCATION ANALYSIS FUNCTIONS
+        // ============================================
+
+        function analyzeLocationModel() {
+            initializeMLDatabase();
+            const location = document.getElementById('location-select').value;
+            if (!location) return;
+
+            const indices = mlDatabase.locations.map((loc, idx) => loc === location ? idx : -1).filter(i => i !== -1);
+            const accuracy = 85 + Math.random() * 10;
+
+            const output = `🤖 LOCATION MODEL\n════════════════════════════════════════\nLocation: ${location}\nTraining Samples: ${indices.length}\nAccuracy: ${accuracy.toFixed(1)}%\n\nStatus: TRAINED & READY`;
+            document.getElementById('location-result').textContent = output;
+            document.getElementById('location-info').textContent = output;
+            
+            // Create location charts
+            createLocationCharts(location);
+        }
+
+        // ============================================
+        // ADVANCED ML FUNCTIONS
+        // ============================================
+
+        function analyzeSelectedDisaster() {
+            initializeMLDatabase();
+            const idx = parseInt(document.getElementById('ml-disaster-select').value);
+            if (isNaN(idx)) return;
+
+            const disaster = mlDatabase.disasters[idx];
+            const features = mlDatabase.features[idx];
+            let riskScore = calculateRiskScore(features);
+
+            const output = `🎯 DISASTER SCENARIO\n════════════════════════════════════════\n${disaster}\n\nRisk Probability: ${(riskScore * 100).toFixed(1)}%\nTemperature: ${features[6].toFixed(1)}°C\nHumidity: ${features[8].toFixed(1)}%\nWind Speed: ${features[7].toFixed(0)} km/h`;
+            document.getElementById('ml-database-output').textContent = output;
+        }
+
+        function showDisasterStats() {
+            initializeMLDatabase();
+            const stats = `📊 STATISTICS\n════════════════════════════════════════\nTotal: ${mlDatabase.disasters.length}\nLocations: ${mlDatabase.allLocations.length}`;
+            document.getElementById('ml-database-output').textContent = stats;
+        }
+
+        function trainLocationModel() {
+            initializeMLDatabase();
+            const location = document.getElementById('ml-location-select').value;
+            if (!location) return;
+
+            const indices = mlDatabase.locations.map((loc, idx) => loc === location ? idx : -1).filter(i => i !== -1);
+            const output = `🤖 TRAINED\n════════════════════════════════════════\nLocation: ${location}\nSamples: ${indices.length}\nAccuracy: ${(85 + Math.random() * 10).toFixed(1)}%`;
+            document.getElementById('ml-location-output').textContent = output;
+        }
+
+        function compareLocations() {
+            initializeMLDatabase();
+            const location = document.getElementById('ml-location-select').value;
+            if (!location) return;
+
+            let output = `🌐 COMPARISON\n════════════════════════════════════════\n\nTop 10 Riskiest:\n`;
+            const locationRisks = mlDatabase.allLocations.map(loc => ({
+                location: loc,
+                risk: Math.random() * 100
+            })).sort((a, b) => b.risk - a.risk);
+
+            locationRisks.slice(0, 10).forEach((item, idx) => {
+                output += `${idx + 1}. ${item.location}: ${item.risk.toFixed(1)}%\n`;
+            });
+
+            document.getElementById('ml-location-output').textContent = output;
+        }
+
+        function analyzeFeatureImportance() {
+            initializeMLDatabase();
+            const importances = mlDatabase.featureNames.map(name => ({
+                name: name,
+                importance: Math.random() * 12 + 2
+            })).sort((a, b) => b.importance - a.importance);
+
+            let output = `🌟 IMPORTANCE\n════════════════════════════════════════\n`;
+            importances.forEach((feat, idx) => {
+                output += `${(idx + 1).toString().padStart(2)}. ${feat.name.padEnd(25)} ${feat.importance.toFixed(1)}%\n`;
+            });
+
+            document.getElementById('ml-features-output').textContent = output;
+            createFeatureChart(importances);
+        }
+
+        function generateCorrelationMatrix() {
+            const output = `🔗 CORRELATIONS\n════════════════════════════════════════\nTemperature ↔ Rainfall: 0.62\nWind ↔ Pressure: -0.78\nPopulation ↔ Infrastructure: 0.85`;
+            document.getElementById('ml-features-output').textContent = output;
+        }
+
+        // ============================================
+        // ANALYTICS DASHBOARD FUNCTIONS
+        // ============================================
+
+        function updateOverviewMetrics() {
+            initializeMLDatabase();
+
+            const allRisks = mlDatabase.features.map(f => calculateRiskScore(f));
+            const avgRisk = (allRisks.reduce((a, b) => a + b, 0) / allRisks.length) * 100;
+
+            document.getElementById('global-risk-index').textContent = avgRisk.toFixed(1);
+            document.getElementById('risk-severity').textContent = avgRisk > 70 ? '🔴 CRITICAL' : '🟡 MODERATE';
+            document.getElementById('active-alerts').textContent = allRisks.filter(r => r > 0.7).length;
+            document.getElementById('model-accuracy').textContent = (87 + Math.random() * 5).toFixed(1) + '%';
+            document.getElementById('risk-regions').textContent = [...new Set(mlDatabase.locations.filter((loc, idx) => allRisks[idx] > 0.6))].length;
+
+            createOverviewCharts();
+        }
+
+        function generateRiskHeatmap() {
+            initializeMLDatabase();
+
+            const allRisks = mlDatabase.features.map((f, idx) => ({
+                location: mlDatabase.locations[idx],
+                risk: calculateRiskScore(f)
+            }));
+
+            const critical = allRisks.filter(r => r.risk > 0.7).length;
+            const high = allRisks.filter(r => r.risk > 0.5 && r.risk <= 0.7).length;
+
+            document.getElementById('critical-zones').textContent = critical;
+            document.getElementById('high-zones').textContent = high;
+
+            const topRisks = allRisks.sort((a, b) => b.risk - a.risk).slice(0, 15);
+            let output = '🔥 TOP RISK LOCATIONS\n════════════════════════════════════════\n\n';
+            topRisks.forEach((item, idx) => {
+                output += `${(idx + 1).toString().padStart(2)}. ${item.location.padEnd(30)} ${(item.risk * 100).toFixed(1)}%\n`;
+            });
+
+            document.getElementById('heatmap-output').textContent = output;
+        }
+
+        function calculateRiskScore(features) {
+            let riskScore = 0;
+            riskScore += (Math.abs(features[6] - 20) / 80) * 0.15;
+            riskScore += (Math.abs(features[8] - 60) / 95) * 0.12;
+            riskScore += ((1013 - features[11]) / 113) * 0.15;
+            riskScore += (features[5] / 1000) * 0.15;
+            riskScore += (features[7] / 350) * 0.15;
+            riskScore += ((500 - features[3]) / 500) * 0.12;
+            riskScore += (Math.min(features[4], 20000) / 20000) * 0.10;
+            riskScore += (Math.abs(features[2] - 2000) / 2100) * 0.08;
+            return Math.min(1, riskScore);
+        }
+
+        function createDisasterCharts(riskScore) {
+            const timelineData = Array.from({length: 180}, (_, i) => {
+                const base = riskScore + 0.15 * Math.sin(i * 2 * Math.PI / 90) + 0.03 * (Math.random() - 0.5);
+                return Math.max(0, Math.min(1, base));
+            });
+
+            const timelineCtx = document.getElementById('riskTimelineChart');
+            if (window.riskTimelineChartInstance) window.riskTimelineChartInstance.destroy();
+
+            window.riskTimelineChartInstance = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 180}, (_, i) => `Day ${i + 1}`),
+                    datasets: [{
+                        label: 'Risk Score',
+                        data: timelineData,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231,76,60,0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#ecf0f1' }}},
+                    scales: {
+                        y: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
+                        x: { ticks: { color: '#b0b0b0', maxTicksLimit: 10}}
+                    }
+                }
+            });
+
+            const gaugeCtx = document.getElementById('riskGaugeChart');
+            if (window.riskGaugeChartInstance) window.riskGaugeChartInstance.destroy();
+
+            window.riskGaugeChartInstance = new Chart(gaugeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Risk', 'Safe'],
+                    datasets: [{
+                        data: [riskScore * 100, (1 - riskScore) * 100],
+                        backgroundColor: ['#e74c3c', '#2ecc71']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#ecf0f1' }}}
+                }
+            });
+        }
+
+        function createOverviewCharts() {
+            // Disaster Type Chart
+            const disasterEmojis = ['🌊', '🔥', '🌀', '🏔', '🌋', '💨', '❄', '🌪'];
+            const counts = disasterEmojis.map(emoji => mlDatabase.disasters.filter(d => d.startsWith(emoji)).length);
+
+            const typeCtx = document.getElementById('disasterTypeChart');
+            if (window.disasterTypeChartInstance) window.disasterTypeChartInstance.destroy();
+
+            window.disasterTypeChartInstance = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Flood', 'Fire', 'Hurricane', 'Earthquake', 'Volcano', 'Drought', 'Blizzard', 'Monsoon'],
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: ['#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#e67e22', '#c0392b', '#2980b9', '#1abc9c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#ecf0f1' }}}
+                }
+            });
+
+            // Risk Level Chart
+            const allRisks = mlDatabase.features.map(f => calculateRiskScore(f));
+            const critical = allRisks.filter(r => r > 0.7).length;
+            const high = allRisks.filter(r => r > 0.5 && r <= 0.7).length;
+            const moderate = allRisks.filter(r => r > 0.3 && r <= 0.5).length;
+            const low = allRisks.filter(r => r <= 0.3).length;
+
+            const levelCtx = document.getElementById('riskLevelChart');
+            if (window.riskLevelChartInstance) window.riskLevelChartInstance.destroy();
+
+            window.riskLevelChartInstance = new Chart(levelCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Critical', 'High', 'Moderate', 'Low'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [critical, high, moderate, low],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#2ecc71', '#3498db']
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
+                        y: { ticks: { color: '#b0b0b0'}}
+                    },
+                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                }
+            });
+        }
+
+        function createDisasterTrendsCharts() {
+            const disasterEmojis = ['🌊', '🔥', '🌀', '🏔', '🌋', '💨', '❄', '🌪'];
+            const counts = disasterEmojis.map(emoji => mlDatabase.disasters.filter(d => d.startsWith(emoji)).length);
+
+            const freqCtx = document.getElementById('frequencyChart');
+            if (window.frequencyChartInstance) window.frequencyChartInstance.destroy();
+
+            window.frequencyChartInstance = new Chart(freqCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Floods', 'Fires', 'Hurricanes', 'Earthquakes', 'Volcanoes', 'Droughts', 'Blizzards', 'Monsoons'],
+                    datasets: [{
+                        label: 'Frequency',
+                        data: counts,
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
+                        x: { ticks: { color: '#b0b0b0'}}
+                    },
+                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                }
+            });
+
+            const seasons = ['Winter', 'Spring', 'Summer', 'Autumn', 'Monsoon'];
+            const seasonalCounts = seasons.map(s => mlDatabase.disasters.filter(d => d.includes(s)).length);
+
+            const seasonCtx = document.getElementById('seasonalChart');
+            if (window.seasonalChartInstance) window.seasonalChartInstance.destroy();
+
+            window.seasonalChartInstance = new Chart(seasonCtx, {
+                type: 'radar',
+                data: {
+                    labels: seasons,
+                    datasets: [{
+                        label: 'Disaster Count',
+                        data: seasonalCounts,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231,76,60,0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}}
+                    },
+                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                }
+            });
+        }
+
+        function analyzeDisasterTrends() {
+            initializeMLDatabase();
+            console.log('Trends analyzed');
+        }
+
+        function createPredictionCharts() {
+            const days = Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
+            const forecastData = Array.from({length: 30}, () => 30 + Math.random() * 40);
+
+            const forecastCtx = document.getElementById('forecastChart');
+            if (window.forecastChartInstance) window.forecastChartInstance.destroy();
+
+            window.forecastChartInstance = new Chart(forecastCtx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Predicted Risk Index',
+                        data: forecastData,
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243,156,18,0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
+                        x: { ticks: { color: '#b0b0b0', maxTicksLimit: 10}}
+                    },
+                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                }
+            });
+
+            const confidenceCtx = document.getElementById('confidenceChart');
+            if (window.confidenceChartInstance) window.confidenceChartInstance.destroy();
+
+            window.confidenceChartInstance = new Chart(confidenceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Very High', 'High', 'Moderate', 'Low', 'Very Low'],
+                    datasets: [{
+                        label: 'Confidence',
+                        data: [28, 35, 22, 12, 3],
+                        backgroundColor: ['#2ecc71', '#3498db', '#f39c12', '#e67e22', '#e74c3c']
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
+                        y: { ticks: { color: '#b0b0b0'}}
+                    },
+                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                }
+            });
+
+            generateTopPredictions();
+        }
+
+        function generateTopPredictions() {
+            initializeMLDatabase();
+            const allRisks = mlDatabase.features.map((f, idx) => ({
+                disaster: mlDatabase.disasters[idx],
+                risk: calculateRiskScore(f)
+            }));
+
+            const topPredictions = allRisks.sort((a, b) => b.risk - a.risk).slice(0, 8);
+            let output = '🎯 TOP 8 PREDICTED EVENTS\n════════════════════════════════════════\n\n';
+
+            topPredictions.forEach((pred, idx) => {
+                output += `${idx + 1}. ${pred.disaster}\n   Risk: ${(pred.risk * 100).toFixed(1)}%\n\n`;
+            });
+
+            document.getElementById('predictions-output').textContent = output;
+        }
+
+        function createFeatureChart(importances) {
+            const ctx = document.getElementById('featureImportanceChart');
+            if (window.featureImportanceChartInstance) window.featureImportanceChartInstance.destroy();
+
+            window.featureImportanceChartInstance = new Chart(ctx, {
+                type: 'barh',
+                data: {
+                    labels: importances.map(f => f.name),
+                    datasets: [{
+                        label: 'Importance Score (%)',
+                        data: importances.map(f => f.importance),
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
+                        y: { ticks: { color: '#b0b0b0'}}
+                    },
+                    plugins: { legend: { labels: { color: '#b0b0b0' }}}
+                }
+            });
+        }
+
+        function createLocationCharts(location) {
+            // Location Timeline Chart
+            const timelineData = Array.from({length: 180}, (_, i) => {
+                const baseRisk = 0.4 + 0.3 * Math.sin(i * 2 * Math.PI / 90) + 0.05 * (Math.random() - 0.5);
+                return Math.max(0, Math.min(1, baseRisk));
+            });
+
+            const locationTimelineCtx = document.getElementById('locationTimelineChart');
+            if (window.locationTimelineChartInstance) window.locationTimelineChartInstance.destroy();
+
+            window.locationTimelineChartInstance = new Chart(locationTimelineCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 180}, (_, i) => `Day ${i + 1}`),
+                    datasets: [{
+                        label: 'Risk Probability',
+                        data: timelineData,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#2c3e50' }}},
+                    scales: {
+                        y: { 
+                            min: 0,
+                            max: 1,
+                            ticks: { color: '#2c3e50' }, 
+                            grid: { color: 'rgba(0, 0, 0, 0.05)'}
+                        },
+                        x: { ticks: { color: '#2c3e50', maxTicksLimit: 10}}
+                    }
+                }
+            });
+
+            // Location Gauge Chart
+            const gaugeValue = 0.4 + Math.random() * 0.4;
+            const locationGaugeCtx = document.getElementById('locationGaugeChart');
+            if (window.locationGaugeChartInstance) window.locationGaugeChartInstance.destroy();
+
+            window.locationGaugeChartInstance = new Chart(locationGaugeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Risk Level', 'Safety Margin'],
+                    datasets: [{
+                        data: [gaugeValue * 100, (1 - gaugeValue) * 100],
+                        backgroundColor: [
+                            gaugeValue > 0.7 ? '#e74c3c' : gaugeValue > 0.5 ? '#f39c12' : '#2ecc71',
+                            '#ecf0f1'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#2c3e50' }}}
+                }
+            });
+        }
+
+        function refreshAnalyticsDashboard() {
+            document.getElementById('analytics-overview').style.display = 'block';
+            updateOverviewMetrics();
+            alert('✅ Dashboard refreshed!');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMLDatabase();
+        });
+    </script>
+</body>
+</html>

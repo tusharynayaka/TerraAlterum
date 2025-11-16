@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TerraAlertum — Login</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root{
+    --bg1: #1a0f2e;
+    --bg2: #2d1b4e;
+    --card: rgba(255,255,255,0.06);
+    --accent: #a78bfa;
+    --muted: rgba(255,255,255,0.80);
+    --highlight: #8b5cf6;
+  }
+  .scene{position:relative;overflow:hidden}
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.7;mix-blend-mode:screen;transform:translate3d(0,0,0)}
+  .blob.b1{width:360px;height:360px;left:-80px;top:-80px;background:radial-gradient(circle at 30% 30%, rgba(167,139,250,0.9), rgba(139,92,246,0.5));animation:float 12s ease-in-out infinite}
+  .blob.b2{width:260px;height:260px;right:-60px;bottom:-60px;background:radial-gradient(circle at 70% 70%, rgba(139,92,246,0.75), rgba(167,139,250,0.35));animation:float 10s ease-in-out infinite reverse}
+  @keyframes float{0%{transform:translateY(0) translateX(0)}50%{transform:translateY(-18px) translateX(8px)}100%{transform:translateY(0) translateX(0)}}
+  input,select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(167,139,250,0.12);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);color:white;margin-bottom:12px;transition:box-shadow .18s,transform .08s,border-color .12s}
+  input:focus{outline:none;box-shadow:0 10px 30px rgba(167,139,250,0.14);border-color:rgba(167,139,250,0.65);transform:translateY(-1px)}
+  .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent),var(--highlight));color:white;cursor:pointer;transition:transform .12s,box-shadow .12s;width:100%;font-weight:600}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(167,139,250,0.16)}
+  .tab{transition:transform .12s,box-shadow .12s}
+  .tab:focus{outline:none;transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.35)}
+  .pw-wrap{position:relative}
+  .pw-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:transparent;color:rgba(255,255,255,0.8);cursor:pointer;padding:6px;border-radius:8px;transition:color .2s}
+  .pw-toggle:focus{outline:2px solid rgba(167,139,250,0.28)}
+  .pw-toggle:hover{color:white}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff;display:flex;align-items:center;justify-content:center;padding:30px;overflow:hidden}
+  a{color:var(--accent);text-decoration:none}
+  .container{width:100%;max-width:720px;display:grid;grid-template-columns:1fr;gap:0}
+  @media(max-width:900px){.container{grid-template-columns:1fr}}
+  .main{background:rgba(0,0,0,0.7);padding:26px;border-radius:14px;box-shadow:0 12px 60px rgba(0,0,0,0.8);backdrop-filter:blur(10px);border:1px solid rgba(167,139,250,0.2)}
+  .brand{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--highlight));display:flex;align-items:center;justify-content:center;font-weight:800;color:white}
+  h1{margin:0;font-size:20px}
+  p.lead{margin:6px 0 0 0;color:var(--muted)}
+  .tabs{display:flex;gap:8px;margin-top:18px}
+  .tab{flex:1;padding:10px;border-radius:10px;background:transparent;border:1px solid transparent;text-align:center;cursor:pointer}
+  .tab.active{background:linear-gradient(90deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.04);font-weight:700}
+  form{margin-top:12px}
+  label{display:block;font-size:13px;margin-bottom:6px}
+  input,select,button{font:inherit}
+  input::placeholder{color:rgba(255,255,255,0.45)}
+  .row{display:flex;gap:12px}
+  .muted{color:var(--muted);font-size:13px}
+  .msg{padding:10px;border-radius:8px;margin-bottom:10px;display:none}
+  .msg.error{background:rgba(220,38,38,0.12);color:#ffdddd;border-left:4px solid #ef4444}
+  .msg.success{background:rgba(34,197,94,0.10);color:#ddffea;border-left:4px solid #10b981}
+  nav{display:flex;gap:12px;justify-content:center;margin-bottom:12px}
+  nav a{color:#dbeafe;font-weight:600}
+  .info{background:rgba(167,139,250,0.08);padding:12px;border-radius:10px;border-left:4px solid var(--accent);font-size:13px;color:var(--muted);margin-bottom:12px}
+  #map { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; filter: brightness(0.7) contrast(1.2);}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="scene">
+  <div class="blob b1" aria-hidden="true"></div>
+  <div class="blob b2" aria-hidden="true"></div>
+  <div class="container">
+    <main class="main" aria-labelledby="hero">
+      <!-- Globe section with real-time data -->
+      <div id="globe-section" style="margin: 18px 0; background: rgba(167,139,250,0.10); border-radius: 12px; padding: 18px; text-align: center; color: var(--muted);">
+        <div id="globe-loading">Loading globe data...</div>
+        <div id="globe-content" style="display:none;">
+          <div style="font-size:2rem;">🌍</div>
+          <div id="globe-desc" style="font-size:1.1rem;"></div>
+          <div id="globe-country" style="font-size:1.2rem;font-weight:600;"></div>
+          <div id="globe-city" style="font-size:1rem;"></div>
+        </div>
+      </div>
+      <script>
+        async function loadGlobeData() {
+          let lat = 12.9716, lon = 77.5946, city = 'Bengaluru', country = 'India';
+          try {
+            const loc = await fetch('https://ipapi.co/json/').then(r=>r.json());
+            lat = loc.latitude; lon = loc.longitude; city = loc.city; country = loc.country_name;
+          } catch {}
+          document.getElementById('globe-loading').style.display = 'none';
+          document.getElementById('globe-content').style.display = '';
+          document.getElementById('globe-desc').textContent = `You are viewing real-time globe data.`;
+          document.getElementById('globe-country').textContent = `Country: ${country}`;
+          document.getElementById('globe-city').textContent = `City: ${city}`;
+        }
+        loadGlobeData();
+      </script>
+
+      <div class="tabs" role="tablist">
+        <div class="tab active" data-tab="login" role="tab" tabindex="0">Login</div>
+        <div class="tab" data-tab="register" role="tab" tabindex="0">Register</div>
+      </div>
+
+      <div id="msg" class="msg" role="status" aria-live="polite"></div>
+
+      <div class="info">
+        🔒 Sign in to access your account.
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" autocomplete="on">
+        <label for="le">Email</label>
+        <input id="le" name="email" type="email" placeholder="you@domain.com" required />
+        <label for="lp">Password</label>
+        <div class="pw-wrap">
+          <input id="lp" name="password" type="password" placeholder="Password" required />
+          <button type="button" class="pw-toggle" data-target="lp" aria-label="Toggle password visibility">👁️</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <label class="muted"><input id="lrem" type="checkbox" /> Remember me</label>
+          <a id="forgot" href="#" class="muted">Forgot?</a>
+        </div>
+        <button type="submit" class="btn">Sign in</button>
+      </form>
+
+      <!-- REGISTER FORM (4 fields: name, email, password, confirm) -->
+      <form id="registerForm" style="display:none" autocomplete="on">
+        <label for="rname">Full name</label>
+        <input id="rname" name="rname" type="text" placeholder="Jane Doe" required />
+
+        <label for="re">Email</label>
+        <input id="re" name="re" type="email" placeholder="you@domain.com" required />
+
+        <label for="rp">Password</label>
+        <div class="pw-wrap">
+          <input id="rp" name="rp" type="password" placeholder="Create a password" required />
+          <button type="button" class="pw-toggle" data-target="rp" aria-label="Toggle password visibility">👁️</button>
+        </div>
+
+        <label for="rp2">Confirm password</label>
+        <div class="pw-wrap">
+          <input id="rp2" name="rp2" type="password" placeholder="Repeat password" required />
+          <button type="button" class="pw-toggle" data-target="rp2" aria-label="Toggle password visibility">👁️</button>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top:6px">Create account</button>
+        <div class="muted" style="margin-top:8px">By creating an account you agree to our <a href="#">Terms</a>.</div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-analytics.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, getDocFromCache } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAL3drkrFJAf30kR7I6tftMt3bghqrVGAU",
+  authDomain: "login-page-d1895.firebaseapp.com",
+  projectId: "login-page-d1895",
+  storageBucket: "login-page-d1895.firebasestorage.app",
+  messagingSenderId: "157931472964",
+  appId: "1:157931472964:web:31e62271f8c1f848999411",
+  measurementId: "G-F4CNPL4BY1"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// UI Elements
+const tabs = document.querySelectorAll('.tab');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const msgEl = document.getElementById('msg');
+
+function show(type, text){
+  msgEl.className = 'msg ' + (type==='error'?'error':'success');
+  msgEl.textContent = text;
+  msgEl.style.display='block';
+  setTimeout(()=> msgEl.style.display='none', 4000);
+}
+
+function switchTab(to){
+  tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===to));
+  loginForm.style.display = (to==='login')?'block':'none';
+  registerForm.style.display = (to==='register')?'block':'none';
+}
+
+tabs.forEach(t=>t.addEventListener('click', ()=> switchTab(t.dataset.tab)));
+
+// Password toggle
+document.querySelectorAll('.pw-toggle').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const target = document.getElementById(btn.dataset.target);
+    if(!target) return;
+    const is = target.type==='password';
+    target.type = is?'text':'password';
+    btn.textContent = is?'🙈':'👁️';
+  });
+});
+
+// REGISTER
+registerForm.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const name = document.getElementById('rname').value.trim();
+  const email = document.getElementById('re').value.trim();
+  const password = document.getElementById('rp').value;
+  const confirm = document.getElementById('rp2').value;
+
+  if(!name || !email || !password) return show('error','Name, email & password required');
+  if(password !== confirm) return show('error','Passwords do not match');
+
+  try{
+    const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+    await setDoc(doc(db,'users',userCredential.user.uid), {name,email,loc:''});
+    show('success','Account created — please sign in');
+    switchTab('login');
+  }catch(err){
+    show('error',err.message);
+  }
+});
+
+// LOGIN
+loginForm.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email = loginForm.email.value.trim();
+  const password = loginForm.password.value;
+
+  if(!email || !password) return show('error','Email & password required');
+
+  try{
+    const userCredential = await signInWithEmailAndPassword(auth,email,password);
+    // Try to read the user's profile from server; if offline, fall back to cache or use email
+    let displayName = '';
+    try{
+      const userDoc = await getDoc(doc(db,'users',userCredential.user.uid));
+      if(userDoc && userDoc.exists && userDoc.exists()){
+        const userData = userDoc.data();
+        displayName = userData?.name || '';
+      }
+    }catch(fetchErr){
+      console.warn('Could not fetch user document from server (maybe offline):', fetchErr);
+      // try cache fallback (if available)
+      try{
+        const cached = await getDocFromCache(doc(db,'users',userCredential.user.uid));
+        if(cached && cached.exists && cached.exists()){
+          const userData = cached.data();
+          displayName = userData?.name || '';
+        }
+      }catch(cacheErr){
+        console.warn('No cached user document available:', cacheErr);
+      }
+    }
+
+  show('success', `Successfully signed in as ${displayName || userCredential.user.email}`);
+  setTimeout(()=> location.href='2.html', 1500);
+  }catch(err){
+    // Common causes: wrong credentials, network issues, auth errors
+    console.error('Login error', err);
+    show('error', err.message || 'Login failed');
+  }
+});
+
+// Init
+switchTab('login');
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Initialize Leaflet map as the page background
+(function(){
+  try{
+    const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([20,0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // create pulsing marker style using a tiny divIcon
+    const pulseIcon = L.divIcon({ className: 'pulse-marker', html: '<span style="display:block;width:14px;height:14px;border-radius:50%;background:#8b5cf6;box-shadow:0 0 12px rgba(139,92,246,0.9);"></span>', iconSize: [14,14] });
+
+    function placeMarker(lat, lon, precise=true){
+      map.setView([lat, lon], precise?13:10);
+      // circle marker
+      L.circleMarker([lat, lon], { radius:8, color:'#8b5cf6', fillColor:'#8b5cf6', fillOpacity:0.9 }).addTo(map).bindPopup(precise?"You are here":"Approximate location").openPopup();
+      // pulsing icon overlay
+      L.marker([lat, lon], { icon: pulseIcon, interactive: false }).addTo(map);
+    }
+
+    // Try browser geolocation first, fallback to IP-based lookup
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        placeMarker(pos.coords.latitude, pos.coords.longitude, true);
+      }, err=>{
+        // fallback to IP geolocation
+        fetch('https://ipapi.co/json/').then(r=>r.json()).then(data=>{
+          if(data && data.latitude && data.longitude){
+            placeMarker(data.latitude, data.longitude, false);
+          }
+        }).catch(()=>{});
+      }, { timeout: 7000 });
+    } else {
+      fetch('https://ipapi.co/json/').then(r=>r.json()).then(data=>{
+        if(data && data.latitude && data.longitude){
+          placeMarker(data.latitude, data.longitude, false);
+        }
+      }).catch(()=>{});
+    }
+
+  }catch(e){ console.warn('Leaflet init failed', e); }
+})();
+</script>
+</body>
+</html>

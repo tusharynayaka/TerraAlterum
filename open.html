@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WeatherCast — Real-Time Weather</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #667eea; --primary-dark: #764ba2; --accent: #a78bfa; --highlight: #8b5cf6;
+            --bg-dark: #0f1419; --bg-light: #1a1f2e; --text-light: rgba(255,255,255,0.9);
+            --text-muted: rgba(255,255,255,0.6); --card-bg: rgba(255,255,255,0.05); --border-color: rgba(167,139,250,0.2);
+        }
+        html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,var(--bg-dark) 0%,var(--bg-light) 100%);color:var(--text-light);overflow-x:hidden}
+        .blob-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;pointer-events:none}
+        .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.5;mix-blend-mode:screen}
+        .blob1{width:400px;height:400px;left:-100px;top:-100px;background:rgba(102,126,234,0.5);animation:float 15s ease-in-out infinite}
+        .blob2{width:300px;height:300px;right:-50px;top:50%;background:rgba(167,139,250,0.4);animation:float 12s ease-in-out infinite reverse}
+        .blob3{width:250px;height:250px;left:50%;bottom:-50px;background:rgba(139,92,246,0.3);animation:float 18s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-30px) translateX(10px)}}
+        .container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:30px 20px}
+        header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:18px}
+        .logo-section{display:flex;align-items:center;gap:12px}
+        .logo{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+        .title{font-size:20px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--highlight));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        nav{display:flex;gap:16px}
+        nav a{color:var(--text-muted);text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:600}
+        nav a:hover,nav a.active{color:var(--accent);background:rgba(167,139,250,0.08)}
+        .search-bar{display:flex;gap:10px;flex:1;max-width:480px}
+        .search-bar input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-light);outline:none}
+        .search-btn{padding:10px 18px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--highlight));color:#fff;font-weight:700;cursor:pointer}
+        .current-weather{background:linear-gradient(135deg,rgba(102,126,234,0.12),rgba(139,92,246,0.08));border:1px solid var(--border-color);border-radius:16px;padding:28px;display:flex;gap:30px;align-items:center}
+        .weather-icon{font-size:88px}
+        .weather-info h2{font-size:28px;margin-bottom:6px}
+        .weather-details{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+        .detail-item{background:var(--card-bg);padding:12px;border-radius:10px;border:1px solid var(--border-color);text-align:center}
+        .detail-item .label{font-size:12px;color:var(--text-muted);text-transform:uppercase}
+        .detail-item .value{font-size:18px;font-weight:700;color:var(--accent)}
+        .forecast-section{margin-top:22px}
+        .forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:12px}
+    </style>
+</head>
+<body>
+    <div class="blob-bg"><div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div></div>
+    <div class="container">
+        <header>
+            <div class="logo-section">
+                <div class="logo">🌤️</div>
+                <div class="title">WeatherCast</div>
+            </div>
+            <nav>
+                <a href="2.html">Home</a>
+            </nav>
+            <div class="search-bar">
+                <input type="text" id="city" placeholder="Search city..." />
+                <button class="search-btn" onclick="getWeather()">Search</button>
+                <button class="search-btn" onclick="getLocationWeather()">Use my location</button>
+            </div>
+        </header>
+
+        <div class="current-weather" id="currentWeather">
+            <div class="weather-icon">🌤️</div>
+            <div class="weather-info">
+                <h2 id="locHeading">Enter a city</h2>
+                <p id="descHeading">--</p>
+                <div class="weather-details">
+                    <div class="detail-item"><div class="label">Temp</div><div class="value" id="tempVal">-</div></div>
+                    <div class="detail-item"><div class="label">Humidity</div><div class="value" id="humVal">-</div></div>
+                    <div class="detail-item"><div class="label">Wind</div><div class="value" id="windVal">-</div></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="forecast-section">
+            <h3 style="color:var(--text-muted);margin-top:18px">Upcoming Forecast</h3>
+            <div class="forecast-grid" id="forecastGrid"></div>
+        </section>
+
+        <div id="rawWeather" style="display:none"></div>
+    </div>
+
+    <script>
+        // Keep your existing API key and fetch logic
+        const apiKey = 'e15ee20095f1ca448fd5782b1d106790'; // Your OpenWeatherMap API key
+
+        async function getWeather() {
+            const city = document.getElementById('city').value;
+            if (!city) { alert('Please enter a city name.'); return; }
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+            await fetchWeather(url);
+            document.getElementById('city').value = '';
+        }
+
+        function getLocationWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+                    await fetchWeather(url);
+                }, () => alert('Unable to retrieve your location. Please allow location access.'));
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        async function fetchWeather(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.cod === 200) {
+                    const { name, sys, main, weather, wind } = data;
+                    // Update main card
+                    document.getElementById('locHeading').textContent = `${name}, ${sys.country}`;
+                    document.getElementById('descHeading').textContent = weather[0].description;
+                    document.getElementById('tempVal').textContent = `${main.temp} °C`;
+                    document.getElementById('humVal').textContent = `${main.humidity}%`;
+                    document.getElementById('windVal').textContent = `${wind.speed} m/s`;
+                    // Render simple forecast placeholders
+                    renderSimpleForecast();
+                } else {
+                    alert('Location not found. Try again.');
+                }
+            } catch (error) {
+                alert('Error fetching weather data.');
+                console.error(error);
+            }
+        }
+
+        function renderSimpleForecast(){
+            // Placeholder forecast cards to keep the look consistent
+            const container = document.getElementById('forecastGrid');
+            const days = ['Mon','Tue','Wed','Thu','Fri'];
+            container.innerHTML = days.map(d => `
+                <div style="background:var(--card-bg);border:1px solid var(--border-color);padding:12px;border-radius:10px;text-align:center">
+                    <div style="color:var(--text-muted);font-weight:700">${d}</div>
+                    <div style="font-size:22px;margin:8px 0">${Math.floor(15 + Math.random()*12)}°</div>
+                    <div style="opacity:0.8">${['Sunny','Cloudy','Rainy'][Math.floor(Math.random()*3)]}</div>
+                </div>
+            `).join('');
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', ()=>{
+            // optional: show a default
+            document.getElementById('locHeading').textContent = 'Enter a city';
+        });
+    </script>
+</body>
+</html>

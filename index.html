@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Disaster Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #ui { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(255,255,255,0.8); padding: 10px; max-height: 90vh; overflow-y: auto; border-radius: 8px; }
+        #alerts { position: absolute; bottom: 10px; left: 10px; background: #f88; padding: 10px; border-radius: 8px; }
+        #prediction-panel { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            z-index: 10; 
+            background: rgba(50, 50, 50, 0.9); 
+            color: #fff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            min-width: 280px;
+            max-width: 350px;
+            border: 2px solid #444;
+        }
+        #prediction-panel h3 {
+            margin: 0 0 10px 0;
+            color: #ffeb3b;
+            font-size: 16px;
+        }
+        .prediction-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .prediction-label { color: #aaa; }
+        .prediction-value { color: #fff; font-weight: bold; }
+        .risk-critical { color: #ff4444; }
+        .risk-high { color: #ff8800; }
+        .risk-moderate { color: #ffeb3b; }
+        .risk-low { color: #44ff44; }
+        #risk-bar {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg, #44ff44, #ffeb3b, #ff8800, #ff4444);
+            border-radius: 4px;
+            margin: 10px 0;
+            position: relative;
+        }
+        #risk-indicator {
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+        }
+        .env-controls {
+            background: rgba(100, 100, 100, 0.7);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .env-controls label {
+            display: block;
+            margin: 5px 0;
+            color: #ddd;
+        }
+        .env-controls input {
+            width: 80%;
+            padding: 3px;
+            border-radius: 3px;
+            border: 1px solid #666;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <div id="ui">
+        <label>
+            City:
+            <select id="city">
+                <option value="bengaluru">Bengaluru</option>
+                <option value="delhi">Delhi</option>
+            </select>
+        </label>
+        <label>
+            Disaster:
+            <select id="disaster">
+                <option value="none">-- Select Disaster --</option>
+                <option value="fire">Fire</option>
+                <option value="flood">Flood</option>
+                <option value="earthquake">Earthquake</option>
+            </select>
+        </label>
+        <label>
+            Intensity (1-10):
+            <input type="range" id="intensity" min="1" max="10" value="5" style="width: 150px;">
+            <span id="intensityValue">5</span>
+        </label>
+        <label>
+            Disaster X:
+            <input type="range" id="disasterX" min="-20" max="20" value="0" style="width: 150px;">
+            <span id="disasterXValue">0</span>
+        </label>
+        <label>
+            Disaster Z:
+            <input type="range" id="disasterZ" min="-20" max="20" value="0" style="width: 150px;">
+            <span id="disasterZValue">0</span>
+        </label>
+        <label>
+            Alert Email:
+            <input type="email" id="alertEmail" placeholder="you@example.com" style="width: 160px;">
+        </label>
+        <label>
+            Alert Phone (SMS/Call):
+            <input type="tel" id="alertPhone" placeholder="+919739325941" style="width: 160px;">
+        </label>
+        <button onclick="triggerDisaster()">Trigger</button>
+        <button onclick="moveDisaster()">Move Disaster</button>
+        <button onclick="testSMS()">Test SMS</button>
+        <button onclick="testCall()">Test Call</button>
+    </div>
+    <div id="alerts"></div>
+    <div id="prediction-panel">
+        <h3>🤖 ML Disaster Prediction</h3>
+        <div class="prediction-row">
+            <span class="prediction-label">Risk Level:</span>
+            <span class="prediction-value" id="risk-level">UNKNOWN</span>
+        </div>
+        <div class="prediction-row">
+            <span class="prediction-label">Probability:</span>
+            <span class="prediction-value" id="risk-prob">0%</span>
+        </div>
+        <div id="risk-bar">
+            <div id="risk-indicator" style="left: 0%"></div>
+        </div>
+        <div class="prediction-row">
+            <span class="prediction-label">Will Occur:</span>
+            <span class="prediction-value" id="will-occur">No</span>
+        </div>
+        <div class="env-controls">
+            <label>Temperature (°C): <input type="number" id="env-temp" value="25" min="0" max="50" step="1"></label>
+            <label>Humidity (%): <input type="number" id="env-humidity" value="60" min="0" max="100" step="1"></label>
+            <label>Pressure (hPa): <input type="number" id="env-pressure" value="1000" min="950" max="1050" step="1"></label>
+            <label>Time (0-24h): <input type="number" id="env-time" value="12" min="0" max="24" step="1"></label>
+            <button onclick="updatePrediction()" style="width: 100%; margin-top: 8px; padding: 5px; background: #ffeb3b; border: none; border-radius: 3px; cursor: pointer;">Update Prediction</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+    <script>
+        // Basic scene setup
+        let scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue background
+        scene.fog = new THREE.Fog(0x87CEEB, 60, 100); // Add fog for depth
+        
+        let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer({ antialias: true, shadowMap: { enabled: true } });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // Add lighting
+        let ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        let directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(20, 30, 20);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.far = 100;
+        directionalLight.shadow.camera.left = -50;
+        directionalLight.shadow.camera.right = 50;
+        directionalLight.shadow.camera.top = 50;
+        directionalLight.shadow.camera.bottom = -50;
+        scene.add(directionalLight);
+
+        // Simple city map (placeholder)
+        let cityMaps = {
+            bengaluru: { 
+                shelter: {x:-15,z:10}, 
+                npcs: [{x:0,z:0}, {x:2,z:-3}, {x:-2,z:1}],
+                buildings: [
+                    {x:-8, z:-8, w:2, d:3, h:3, color:0xcccccc},
+                    {x:-8, z:0, w:2.5, d:2.5, h:4, color:0xaaaaaa},
+                    {x:6, z:-10, w:3, d:2, h:3.5, color:0xbbbbbb},
+                    {x:8, z:5, w:2, d:2, h:2.5, color:0xdddddd},
+                    {x:-2, z:8, w:2.5, d:2.5, h:3, color:0xcccccc},
+                    {x:10, z:-5, w:2.5, d:2, h:3.8, color:0xbbbbbb},
+                    {x:-12, z:5, w:3, d:3, h:4.2, color:0xcccccc},
+                    {x:2, z:-15, w:2, d:2.5, h:3.2, color:0xdddddd},
+                    {x:-5, z:-12, w:2.5, d:2.5, h:3.5, color:0xaaaaaa},
+                    {x:12, z:8, w:2, d:3, h:3.8, color:0xbbbbbb}
+                ],
+                trees: [
+                    {x:-18, z:-15}, {x:-16, z:-10}, {x:-14, z:12}, {x:-10, z:15},
+                    {x:0, z:16}, {x:5, z:14}, {x:15, z:12}, {x:16, z:-12},
+                    {x:14, z:-8}, {x:-12, z:-18}
+                ]
+            },
+            delhi: { 
+                shelter: {x:10,z:-5}, 
+                npcs: [{x:0,z:0}, {x:2,z:-3}, {x:5,z:5}],
+                buildings: [
+                    {x:-10, z:-5, w:2, d:4, h:3.5, color:0xcccccc},
+                    {x:-5, z:5, w:3, d:2, h:4, color:0xbbbbbb},
+                    {x:0, z:-8, w:2.5, d:2.5, h:3, color:0xdddddd},
+                    {x:8, z:-8, w:2, d:3, h:3, color:0xaaaaaa},
+                    {x:5, z:8, w:3, d:2.5, h:4.5, color:0xcccccc},
+                    {x:-15, z:0, w:2.5, d:2, h:3.6, color:0xbbbbbb},
+                    {x:12, z:5, w:2, d:2.5, h:3.2, color:0xdddddd},
+                    {x:-8, z:12, w:3, d:2, h:4, color:0xcccccc},
+                    {x:8, z:12, w:2.5, d:3, h:3.8, color:0xaaaaaa},
+                    {x:0, z:15, w:2, d:2.5, h:3.4, color:0xbbbbbb}
+                ],
+                trees: [
+                    {x:-18, z:8}, {x:-16, z:-15}, {x:-14, z:0}, {x:-10, z:10},
+                    {x:2, z:18}, {x:6, z:16}, {x:14, z:10}, {x:15, z:-8},
+                    {x:12, z:-15}, {x:-12, z:15}
+                ]
+            }
+        };
+
+        // NPCs and Shelter
+        let npcs = [];
+        let shelters = [];
+        let buildings = [];
+        let humans = []; // New array for walking humans
+        let cars = []; // Array for cars on roads
+        let buildingMeshes = []; // Track all building meshes for collapse
+        let disasterState = { x: 0, z: 0, intensity: 5, active: false, type: 'none', centerMarker: null, carsStoppedByDisaster: false }; // Disaster state tracking
+        
+        // Disaster visual effects
+        let waterMesh = null; // For flood disaster
+        let fireParticles = []; // For fire disaster
+
+        // EmailJS configuration with credentials from email.html
+        const EMAILJS_USER_ID = 'uWUiIqFrXaV28B4zw';
+        const EMAILJS_SERVICE_ID = 'service_mg92uqi';
+        const EMAILJS_TEMPLATE_ID = 'template_zuayo4q';
+
+        // Initialize EmailJS once at page load
+        emailjs.init(EMAILJS_USER_ID);
+
+        async function sendEmailNotification(disasterType, intensity, cityName) {
+            try {
+                const recipient = document.getElementById('alertEmail').value;
+                if(!recipient) {
+                    console.log('No alert email provided; skipping email send.');
+                    return;
+                }
+                const templateParams = {
+                    to_email: recipient,
+                    subject: `DISASTER ALERT: ${disasterType.toUpperCase()} (Intensity ${intensity}/10) at ${cityName}`,
+                    message: `ALERT DISASTER OCCURRED!!!\nType: ${disasterType.toUpperCase()}\nIntensity: ${intensity}/10\nLocation: ${cityName}\nPlease seek shelter immediately!`
+                };
+                const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+                console.log('EmailJS success:', result.status, result.text);
+                document.getElementById('alerts').innerText += "\n\n✓ EMAIL SENT!";
+            } catch(error) {
+                console.error('EmailJS error:', error);
+                document.getElementById('alerts').innerText += "\n\n❌ EMAIL Failed: " + (error.text || error.message || JSON.stringify(error));
+            }
+        }
+
+        function createHuman(x, z) {
+            // Create a simple human figure with head, body, and limbs
+            let humanGroup = new THREE.Group();
+            
+            // Head
+            let headGeom = new THREE.SphereGeometry(0.25, 16, 16);
+            let skinMat = new THREE.MeshPhongMaterial({ color: 0xffcc99, shininess: 30 });
+            let head = new THREE.Mesh(headGeom, skinMat);
+            head.position.y = 1.3;
+            head.castShadow = true;
+            head.receiveShadow = true;
+            humanGroup.add(head);
+            
+            // Body
+            let bodyGeom = new THREE.BoxGeometry(0.3, 0.6, 0.2);
+            let bodyMat = new THREE.MeshPhongMaterial({ color: 0xff6666, shininess: 20 });
+            let body = new THREE.Mesh(bodyGeom, bodyMat);
+            body.position.y = 0.8;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            humanGroup.add(body);
+            
+            // Left arm
+            let armGeom = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+            let armMat = new THREE.MeshPhongMaterial({ color: 0xffcc99, shininess: 20 });
+            let leftArm = new THREE.Mesh(armGeom, armMat);
+            leftArm.position.set(-0.2, 0.95, 0);
+            leftArm.castShadow = true;
+            humanGroup.add(leftArm);
+            
+            // Right arm
+            let rightArm = new THREE.Mesh(armGeom, armMat);
+            rightArm.position.set(0.2, 0.95, 0);
+            rightArm.castShadow = true;
+            humanGroup.add(rightArm);
+            
+            // Left leg
+            let legGeom = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+            let legMat = new THREE.MeshPhongMaterial({ color: 0x333333, shininess: 15 });
+            let leftLeg = new THREE.Mesh(legGeom, legMat);
+            leftLeg.position.set(-0.1, 0.25, 0);
+            leftLeg.castShadow = true;
+            humanGroup.add(leftLeg);
+            
+            // Right leg
+            let rightLeg = new THREE.Mesh(legGeom, legMat);
+            rightLeg.position.set(0.1, 0.25, 0);
+            rightLeg.castShadow = true;
+            humanGroup.add(rightLeg);
+            
+            humanGroup.position.set(x, 0, z);
+            humanGroup.castShadow = true;
+            humanGroup.userData = {
+                walkSpeed: 0.03 + Math.random() * 0.02,
+                walkDirection: Math.random() * Math.PI * 2,
+                leftArm: leftArm,
+                rightArm: rightArm,
+                leftLeg: leftLeg,
+                rightLeg: rightLeg,
+                walkTime: 0
+            };
+            
+            return humanGroup;
+        }
+
+        function spawnCity(city) {
+            // Remove existing NPCs, shelters, buildings, and humans
+            npcs.forEach(npc=>scene.remove(npc));
+            shelters.forEach(shelter=>scene.remove(shelter));
+            buildings.forEach(building=>scene.remove(building));
+            humans.forEach(human=>scene.remove(human));
+            npcs = [];
+            shelters = [];
+            buildings = [];
+            humans = [];
+
+            // Add new NPCs and one shelter
+            const loc = cityMaps[city];
+            
+            // Shelter
+            let boxGeom = new THREE.BoxGeometry(2,1,2);
+            let boxMat = new THREE.MeshPhongMaterial({ color: 0x33ff33, shininess: 50, emissive: 0x00AA00 });
+            let shelter = new THREE.Mesh(boxGeom, boxMat);
+            shelter.position.set(loc.shelter.x,0,loc.shelter.z);
+            shelter.castShadow = true;
+            shelter.receiveShadow = true;
+            shelters.push(shelter);
+            scene.add(shelter);
+
+            // Buildings
+            loc.buildings.forEach(bldg => {
+                // Main building body
+                let geometry = new THREE.BoxGeometry(bldg.w, bldg.h, bldg.d);
+                let material = new THREE.MeshPhongMaterial({ color: bldg.color, shininess: 30 });
+                let building = new THREE.Mesh(geometry, material);
+                building.position.set(bldg.x, bldg.h/2, bldg.z);
+                building.castShadow = true;
+                building.receiveShadow = true;
+                building.userData.isBuilding = true;
+                building.userData.originalPos = { x: bldg.x, y: bldg.h/2, z: bldg.z };
+                building.userData.originalRot = { x: 0, y: 0, z: 0 };
+                buildings.push(building);
+                buildingMeshes.push(building);
+                scene.add(building);
+
+                // Add windows to front face
+                let windowColor = 0x4488ff;
+                let windowSize = 0.4;
+                let windowSpacing = 0.6;
+                let windowRows = Math.floor(bldg.h / windowSpacing);
+                let windowCols = Math.floor(bldg.w / windowSpacing);
+                let windowMat = new THREE.MeshPhongMaterial({ 
+                    color: windowColor, 
+                    shininess: 100,
+                    emissive: 0x2244AA
+                });
+                
+                for(let row = 0; row < windowRows; row++) {
+                    for(let col = 0; col < windowCols; col++) {
+                        let winGeom = new THREE.BoxGeometry(windowSize, windowSize, 0.05);
+                        let window = new THREE.Mesh(winGeom, windowMat);
+                        let x = bldg.x + (col - windowCols/2 + 0.5) * windowSpacing;
+                        let y = bldg.h/2 + (row - windowRows/2 + 0.5) * windowSpacing;
+                        let z = bldg.z + bldg.d/2 + 0.01;
+                        window.position.set(x, y, z);
+                        window.castShadow = true;
+                        scene.add(window);
+                    }
+                }
+
+                // Add windows to back face
+                for(let row = 0; row < windowRows; row++) {
+                    for(let col = 0; col < windowCols; col++) {
+                        let winGeom = new THREE.BoxGeometry(windowSize, windowSize, 0.05);
+                        let winMat = new THREE.MeshBasicMaterial({ color: windowColor });
+                        let window = new THREE.Mesh(winGeom, winMat);
+                        let x = bldg.x + (col - windowCols/2 + 0.5) * windowSpacing;
+                        let y = bldg.h/2 + (row - windowRows/2 + 0.5) * windowSpacing;
+                        let z = bldg.z - bldg.d/2 - 0.01;
+                        window.position.set(x, y, z);
+                        scene.add(window);
+                    }
+                }
+
+                // Add windows to left side
+                let sideCols = Math.floor(bldg.d / windowSpacing);
+                for(let row = 0; row < windowRows; row++) {
+                    for(let col = 0; col < sideCols; col++) {
+                        let winGeom = new THREE.BoxGeometry(windowSize, windowSize, 0.05);
+                        let winMat = new THREE.MeshBasicMaterial({ color: windowColor });
+                        let window = new THREE.Mesh(winGeom, winMat);
+                        let x = bldg.x - bldg.w/2 - 0.01;
+                        let y = bldg.h/2 + (row - windowRows/2 + 0.5) * windowSpacing;
+                        let z = bldg.z + (col - sideCols/2 + 0.5) * windowSpacing;
+                        window.position.set(x, y, z);
+                        scene.add(window);
+                    }
+                }
+
+                // Add windows to right side
+                for(let row = 0; row < windowRows; row++) {
+                    for(let col = 0; col < sideCols; col++) {
+                        let winGeom = new THREE.BoxGeometry(windowSize, windowSize, 0.05);
+                        let winMat = new THREE.MeshBasicMaterial({ color: windowColor });
+                        let window = new THREE.Mesh(winGeom, winMat);
+                        let x = bldg.x + bldg.w/2 + 0.01;
+                        let y = bldg.h/2 + (row - windowRows/2 + 0.5) * windowSpacing;
+                        let z = bldg.z + (col - sideCols/2 + 0.5) * windowSpacing;
+                        window.position.set(x, y, z);
+                        scene.add(window);
+                    }
+                }
+
+                // Add door to front face (bottom center)
+                let doorGeom = new THREE.BoxGeometry(0.8, 1.2, 0.05);
+                let doorMat = new THREE.MeshPhongMaterial({ color: 0x8B4513, shininess: 40 });
+                let door = new THREE.Mesh(doorGeom, doorMat);
+                door.position.set(bldg.x, 0.6, bldg.z + bldg.d/2 + 0.01);
+                door.castShadow = true;
+                scene.add(door);
+
+                // Add roof (darker color)
+                let roofGeom = new THREE.BoxGeometry(bldg.w + 0.2, 0.3, bldg.d + 0.2);
+                let roofMat = new THREE.MeshPhongMaterial({ color: darkenColor(bldg.color, 0.7), shininess: 20 });
+                let roof = new THREE.Mesh(roofGeom, roofMat);
+                roof.position.set(bldg.x, bldg.h + 0.15, bldg.z);
+                roof.castShadow = true;
+                roof.receiveShadow = true;
+                scene.add(roof);
+
+                // Add entrance platform
+                let entranceGeom = new THREE.BoxGeometry(1.2, 0.1, 0.8);
+                let entranceMat = new THREE.MeshBasicMaterial({ color: 0x666666 });
+                let entrance = new THREE.Mesh(entranceGeom, entranceMat);
+                entrance.position.set(bldg.x, 0.05, bldg.z + bldg.d/2 + 0.4);
+                scene.add(entrance);
+
+                // Add door frame
+                let frameGeom = new THREE.BoxGeometry(0.95, 1.3, 0.05);
+                let frameMat = new THREE.MeshBasicMaterial({ color: 0x654321 });
+                let frame = new THREE.Mesh(frameGeom, frameMat);
+                frame.position.set(bldg.x, 0.65, bldg.z + bldg.d/2 + 0.02);
+                scene.add(frame);
+
+                // Add window panes (small details)
+                let paneGeom = new THREE.BoxGeometry(windowSize * 0.8, windowSize * 0.8, 0.02);
+                let paneMat = new THREE.MeshBasicMaterial({ color: 0x2266AA });
+                for(let row = 0; row < windowRows; row++) {
+                    for(let col = 0; col < windowCols; col++) {
+                        let pane = new THREE.Mesh(paneGeom, paneMat);
+                        let x = bldg.x + (col - windowCols/2 + 0.5) * windowSpacing;
+                        let y = bldg.h/2 + (row - windowRows/2 + 0.5) * windowSpacing;
+                        let z = bldg.z + bldg.d/2 + 0.02;
+                        pane.position.set(x, y, z);
+                        scene.add(pane);
+                    }
+                }
+            });
+
+            // Spawn walking humans
+            let numHumans = 8;
+            for(let i = 0; i < numHumans; i++) {
+                let x = (Math.random() - 0.5) * 30;
+                let z = (Math.random() - 0.5) * 30;
+                let human = createHuman(x, z);
+                humans.push(human);
+                scene.add(human);
+            }
+
+            // Spawn cars on roads
+            spawnCars();
+
+            // Add street lights
+            addStreetLights();
+
+            // Add bunker
+            createBunker(city);
+        }
+
+        function createBunker(city) {
+            let bunkerPos;
+            if(city === "bengaluru") {
+                bunkerPos = { x: 15, z: -15 };
+            } else {
+                bunkerPos = { x: -15, z: 15 };
+            }
+
+            // Create bunker group
+            let bunkerGroup = new THREE.Group();
+
+            // Main bunker structure (underground)
+            let bunkerBodyGeom = new THREE.BoxGeometry(4, 2.5, 4);
+            let bunkerMat = new THREE.MeshPhongMaterial({ color: 0x444444, shininess: 40 });
+            let bunkerBody = new THREE.Mesh(bunkerBodyGeom, bunkerMat);
+            bunkerBody.position.set(0, -0.75, 0);
+            bunkerBody.castShadow = true;
+            bunkerBody.receiveShadow = true;
+            bunkerGroup.add(bunkerBody);
+
+            // Bunker entrance door
+            let entranceDoorGeom = new THREE.BoxGeometry(1.5, 1.8, 0.2);
+            let doorMat = new THREE.MeshPhongMaterial({ color: 0x222222, shininess: 60 });
+            let entranceDoor = new THREE.Mesh(entranceDoorGeom, doorMat);
+            entranceDoor.position.set(0, 0.5, 2.1);
+            entranceDoor.castShadow = true;
+            bunkerGroup.add(entranceDoor);
+
+            // Door handle
+            let handleGeom = new THREE.CylinderGeometry(0.08, 0.08, 0.1, 16);
+            let handleMat = new THREE.MeshPhongMaterial({ color: 0xFFD700, shininess: 100 });
+            let handle = new THREE.Mesh(handleGeom, handleMat);
+            handle.rotation.z = Math.PI / 2;
+            handle.position.set(0.5, 0.5, 2.15);
+            handle.castShadow = true;
+            bunkerGroup.add(handle);
+
+            // Bunker entrance ramp
+            let rampGeom = new THREE.BoxGeometry(1.5, 0.3, 3);
+            let rampMat = new THREE.MeshPhongMaterial({ color: 0x555555, shininess: 20 });
+            let ramp = new THREE.Mesh(rampGeom, rampMat);
+            ramp.rotation.z = -0.2;
+            ramp.position.set(0, 0.3, 2.5);
+            ramp.castShadow = true;
+            ramp.receiveShadow = true;
+            bunkerGroup.add(ramp);
+
+            // Bunker roof/cover
+            let roofGeom = new THREE.BoxGeometry(4.3, 0.3, 4.3);
+            let roofMat = new THREE.MeshPhongMaterial({ color: 0x333333, shininess: 35 });
+            let bunkerRoof = new THREE.Mesh(roofGeom, roofMat);
+            bunkerRoof.position.set(0, 1.1, 0);
+            bunkerRoof.castShadow = true;
+            bunkerRoof.receiveShadow = true;
+            bunkerGroup.add(bunkerRoof);
+
+            // Ventilation pipes
+            for(let i = 0; i < 2; i++) {
+                let pipeGeom = new THREE.CylinderGeometry(0.15, 0.15, 0.8, 16);
+                let pipeMat = new THREE.MeshPhongMaterial({ color: 0x777777, shininess: 30 });
+                let pipe = new THREE.Mesh(pipeGeom, pipeMat);
+                pipe.position.set(-1 + i * 2, 1.3, -1.5);
+                pipe.castShadow = true;
+                bunkerGroup.add(pipe);
+
+                // Pipe tops
+                let capGeom = new THREE.ConeGeometry(0.18, 0.2, 16);
+                let capMat = new THREE.MeshPhongMaterial({ color: 0x999999, shininess: 40 });
+                let cap = new THREE.Mesh(capGeom, capMat);
+                cap.position.set(-1 + i * 2, 1.9, -1.5);
+                cap.castShadow = true;
+                bunkerGroup.add(cap);
+            }
+
+            // Warning sign on bunker
+            let signGeom = new THREE.BoxGeometry(1.2, 0.8, 0.1);
+            let signMat = new THREE.MeshPhongMaterial({ color: 0xFF6600, shininess: 50 });
+            let sign = new THREE.Mesh(signGeom, signMat);
+            sign.position.set(0, 0.5, -2.15);
+            sign.castShadow = true;
+            bunkerGroup.add(sign);
+
+            // Set bunker position
+            bunkerGroup.position.set(bunkerPos.x, 0, bunkerPos.z);
+            scene.add(bunkerGroup);
+
+            // Store bunker position for reference
+            if(!window.bunkerPositions) window.bunkerPositions = {};
+            window.bunkerPositions[city] = bunkerPos;
+        }
+
+        function addStreetLights() {
+            // Positions for street lights around the city
+            let lightPositions = [
+                {x: -12, z: -12}, {x: -12, z: 12}, {x: 12, z: -12}, {x: 12, z: 12},
+                {x: -8, z: 0}, {x: 8, z: 0}, {x: 0, z: -8}, {x: 0, z: 8},
+                {x: -15, z: 5}, {x: 15, z: -5}
+            ];
+
+            lightPositions.forEach(pos => {
+                // Pole
+                let poleGeom = new THREE.BoxGeometry(0.15, 3, 0.15);
+                let poleMat = new THREE.MeshPhongMaterial({ color: 0x333333, shininess: 50 });
+                let pole = new THREE.Mesh(poleGeom, poleMat);
+                pole.position.set(pos.x, 1.5, pos.z);
+                pole.castShadow = true;
+                pole.receiveShadow = true;
+                scene.add(pole);
+
+                // Light bulb
+                let bulbGeom = new THREE.SphereGeometry(0.2, 16, 16);
+                let bulbMat = new THREE.MeshPhongMaterial({ 
+                    color: 0xFFFF99, 
+                    emissive: 0xFFFF00,
+                    shininess: 100 
+                });
+                let bulb = new THREE.Mesh(bulbGeom, bulbMat);
+                bulb.position.set(pos.x, 3, pos.z);
+                bulb.castShadow = true;
+                scene.add(bulb);
+
+                // Add point light for illumination
+                let pointLight = new THREE.PointLight(0xFFFF99, 0.5, 25);
+                pointLight.position.set(pos.x, 3, pos.z);
+                pointLight.castShadow = true;
+                scene.add(pointLight);
+            });
+        }
+
+        // Helper function to darken colors
+        function darkenColor(color, factor) {
+            let r = (color >> 16) & 255;
+            let g = (color >> 8) & 255;
+            let b = color & 255;
+            r = Math.floor(r * factor);
+            g = Math.floor(g * factor);
+            b = Math.floor(b * factor);
+            return (r << 16) | (g << 8) | b;
+        }
+
+        // Ground
+        const ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(40,40),
+            new THREE.MeshPhongMaterial({ color: 0x90EE90, shininess: 10 })
+        );
+        ground.rotation.x = -Math.PI/2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Add roads to the scene
+        function createRoads() {
+            // Horizontal road (main street)
+            let horizontalRoad = new THREE.Mesh(
+                new THREE.PlaneGeometry(40, 3),
+                new THREE.MeshPhongMaterial({ color: 0x222222, shininess: 20 })
+            );
+            horizontalRoad.rotation.x = -Math.PI/2;
+            horizontalRoad.position.z = 0;
+            horizontalRoad.position.y = 0.01;
+            horizontalRoad.receiveShadow = true;
+            scene.add(horizontalRoad);
+
+            // Vertical road (cross street)
+            let verticalRoad = new THREE.Mesh(
+                new THREE.PlaneGeometry(3, 40),
+                new THREE.MeshPhongMaterial({ color: 0x222222, shininess: 20 })
+            );
+            verticalRoad.rotation.x = -Math.PI/2;
+            verticalRoad.position.x = 0;
+            verticalRoad.position.y = 0.01;
+            verticalRoad.receiveShadow = true;
+            scene.add(verticalRoad);
+
+            // Road markings - horizontal dashed lines
+            for(let z = -18; z <= 18; z += 1.5) {
+                let marking = new THREE.Mesh(
+                    new THREE.PlaneGeometry(1, 0.15),
+                    new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
+                );
+                marking.rotation.x = -Math.PI/2;
+                marking.position.set(0, 0.02, z);
+                scene.add(marking);
+            }
+
+            // Road markings - vertical dashed lines
+            for(let x = -18; x <= 18; x += 1.5) {
+                let marking = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.15, 1),
+                    new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
+                );
+                marking.rotation.x = -Math.PI/2;
+                marking.position.set(x, 0.02, 0);
+                scene.add(marking);
+            }
+
+            // Edge lines for horizontal road
+            let roadEdgeTop = new THREE.Mesh(
+                new THREE.PlaneGeometry(40, 0.1),
+                new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+            );
+            roadEdgeTop.rotation.x = -Math.PI/2;
+            roadEdgeTop.position.set(0, 0.02, 1.5);
+            scene.add(roadEdgeTop);
+
+            let roadEdgeBottom = new THREE.Mesh(
+                new THREE.PlaneGeometry(40, 0.1),
+                new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+            );
+            roadEdgeBottom.rotation.x = -Math.PI/2;
+            roadEdgeBottom.position.set(0, 0.02, -1.5);
+            scene.add(roadEdgeBottom);
+
+            // Edge lines for vertical road
+            let roadEdgeRight = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.1, 40),
+                new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+            );
+            roadEdgeRight.rotation.x = -Math.PI/2;
+            roadEdgeRight.position.set(1.5, 0.02, 0);
+            scene.add(roadEdgeRight);
+
+            let roadEdgeLeft = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.1, 40),
+                new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+            );
+            roadEdgeLeft.rotation.x = -Math.PI/2;
+            roadEdgeLeft.position.set(-1.5, 0.02, 0);
+            scene.add(roadEdgeLeft);
+        }
+
+        createRoads();
+
+        // Function to spawn cars on roads
+        function spawnCars() {
+            cars.forEach(car => scene.remove(car));
+            cars = [];
+
+            // Spawn cars on horizontal road (z=0, moving along x-axis)
+            for(let i = 0; i < 8; i++) {
+                let carGroup = new THREE.Group();
+                let carX = (Math.random() - 0.5) * 35;
+                let carZ = 0;
+
+                // Car body
+                let bodyGeom = new THREE.BoxGeometry(2, 1, 1);
+                let bodyMat = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+                let body = new THREE.Mesh(bodyGeom, bodyMat);
+                body.position.y = 0.5;
+                body.castShadow = true;
+                body.receiveShadow = true;
+                carGroup.add(body);
+
+                // Wheels
+                for(let j = 0; j < 4; j++) {
+                    let wheelGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+                    let wheelMat = new THREE.MeshPhongMaterial({ color: 0x222222 });
+                    let wheel = new THREE.Mesh(wheelGeom, wheelMat);
+                    wheel.rotation.z = Math.PI / 2;
+                    wheel.position.set(j % 2 === 0 ? -0.6 : 0.6, 0.3, j < 2 ? -0.35 : 0.35);
+                    wheel.castShadow = true;
+                    carGroup.add(wheel);
+                }
+
+                carGroup.position.set(carX, 0, carZ);
+                carGroup.userData = { velocityX: (Math.random() - 0.5) * 0.08, velocityZ: 0, wheels: carGroup.children.filter(c => c.geometry.type === 'CylinderGeometry') };
+                scene.add(carGroup);
+                cars.push(carGroup);
+            }
+
+            // Spawn cars on vertical road (x=0, moving along z-axis)
+            for(let i = 0; i < 8; i++) {
+                let carGroup = new THREE.Group();
+                let carX = 0;
+                let carZ = (Math.random() - 0.5) * 35;
+
+                // Car body
+                let bodyGeom = new THREE.BoxGeometry(2, 1, 1);
+                let bodyMat = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+                let body = new THREE.Mesh(bodyGeom, bodyMat);
+                body.position.y = 0.5;
+                body.castShadow = true;
+                body.receiveShadow = true;
+                carGroup.add(body);
+
+                // Wheels
+                for(let j = 0; j < 4; j++) {
+                    let wheelGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+                    let wheelMat = new THREE.MeshPhongMaterial({ color: 0x222222 });
+                    let wheel = new THREE.Mesh(wheelGeom, wheelMat);
+                    wheel.rotation.z = Math.PI / 2;
+                    wheel.position.set(j % 2 === 0 ? -0.6 : 0.6, 0.3, j < 2 ? -0.35 : 0.35);
+                    wheel.castShadow = true;
+                    carGroup.add(wheel);
+                }
+
+                carGroup.position.set(carX, 0, carZ);
+                carGroup.userData = { velocityX: 0, velocityZ: (Math.random() - 0.5) * 0.08, wheels: carGroup.children.filter(c => c.geometry.type === 'CylinderGeometry') };
+                scene.add(carGroup);
+                cars.push(carGroup);
+            }
+        }
+
+        // Disaster control function
+        function controlDisaster(type, action) {
+            if(action === 'start') {
+                if(type === 'earthquake') {
+                    let intensity = disasterState.intensity;
+                    let shakeIntensity = 0.2 * intensity; // Scale shake with intensity
+                    let shakeDuration = 2000 + intensity * 500; // Longer duration for higher intensity
+                    let startTime = Date.now();
+                    let originalCameraPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+
+                    // Calculate collapse range based on intensity
+                    let collapseRange = 5 + intensity * 3; // Range increases with intensity
+
+                    // Collapse buildings within range of disaster center, except bunker
+                    buildingMeshes.forEach(building => {
+                        if(building.userData.isBuilding) {
+                            let dx = building.position.x - disasterState.x;
+                            let dz = building.position.z - disasterState.z;
+                            let distance = Math.sqrt(dx*dx + dz*dz);
+
+                            // Only collapse if within range
+                            if(distance <= collapseRange) {
+                                // Intensity affects collapse severity
+                                building.userData.collapseStartTime = Date.now() + Math.random() * 200;
+                                building.userData.collapseDuration = 1500 - (intensity * 100) + Math.random() * 500; // Faster collapse with higher intensity
+                                building.userData.collapseRotX = (Math.random() - 0.5) * (Math.PI / 2) * (intensity / 5);
+                                building.userData.collapseRotZ = (Math.random() - 0.5) * (Math.PI / 2) * (intensity / 5);
+                                building.userData.collapseDrop = (3 + Math.random() * 4) * (intensity / 5);
+                            }
+                        }
+                    });
+
+                    // Shake effect
+                    let shakeInterval = setInterval(() => {
+                        let elapsed = Date.now() - startTime;
+                        if(elapsed > shakeDuration) {
+                            clearInterval(shakeInterval);
+                            camera.position.set(originalCameraPos.x, originalCameraPos.y, originalCameraPos.z);
+                            return;
+                        }
+                        let progress = elapsed / shakeDuration;
+                        let shake = Math.sin(elapsed * 0.05) * shakeIntensity * (1 - progress);
+                        camera.position.x = originalCameraPos.x + shake * 0.5;
+                        camera.position.y = originalCameraPos.y + Math.abs(shake) * 0.3;
+                        camera.position.z = originalCameraPos.z + shake * 0.5;
+                    }, 20);
+                }
+            }
+        }
+
+        camera.position.set(0,6,10);
+        camera.lookAt(0,0,0);
+
+        // Create water for flood disaster
+        function createFloodWater() {
+            if (waterMesh) scene.remove(waterMesh);
+            
+            let waterGeom = new THREE.PlaneGeometry(50, 50);
+            let waterMat = new THREE.MeshPhongMaterial({
+                color: 0x0077BE,
+                emissive: 0x003366,
+                transparent: true,
+                opacity: 0.6,
+                shininess: 100
+            });
+            waterMesh = new THREE.Mesh(waterGeom, waterMat);
+            waterMesh.rotation.x = -Math.PI / 2;
+            waterMesh.position.y = 0.1;
+            waterMesh.userData.maxHeight = 3;
+            waterMesh.userData.currentHeight = 0;
+            scene.add(waterMesh);
+        }
+
+        // Update flood water level
+        function updateFloodWater() {
+            if (waterMesh && disasterState.active && disasterState.type === 'flood') {
+                // Gradually raise water level
+                waterMesh.userData.currentHeight += 0.05;
+                if (waterMesh.userData.currentHeight > waterMesh.userData.maxHeight) {
+                    waterMesh.userData.currentHeight = waterMesh.userData.maxHeight;
+                }
+                waterMesh.position.y = waterMesh.userData.currentHeight;
+            }
+        }
+
+        // Create fire particles for fire disaster
+        function createFireParticles() {
+            // Clear existing fire particles
+            fireParticles.forEach(particle => scene.remove(particle.mesh));
+            fireParticles = [];
+            
+            // Create fire particles around disaster center
+            let intensity = disasterState.intensity;
+            let particleCount = Math.floor(intensity * 8);
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Random position around disaster center
+                let angle = Math.random() * Math.PI * 2;
+                let distance = Math.random() * (5 + intensity);
+                let x = disasterState.x + Math.cos(angle) * distance;
+                let z = disasterState.z + Math.sin(angle) * distance;
+                
+                // Create fire ball
+                let fireGeom = new THREE.SphereGeometry(0.3 + Math.random() * 0.5, 8, 8);
+                let fireMat = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(0.05, 1, 0.5 + Math.random() * 0.3), // Red to orange
+                    emissive: 0xFF6600,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                let fireMesh = new THREE.Mesh(fireGeom, fireMat);
+                fireMesh.position.set(x, 0.5 + Math.random() * 2, z);
+                
+                scene.add(fireMesh);
+                
+                fireParticles.push({
+                    mesh: fireMesh,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: 0.1 + Math.random() * 0.1,
+                    vz: (Math.random() - 0.5) * 0.3,
+                    life: 60
+                });
+            }
+        }
+
+        // Update fire particles
+        function updateFireParticles() {
+            fireParticles = fireParticles.filter(particle => {
+                particle.life--;
+                
+                // Move particle upward and outward (fire rises and spreads)
+                particle.mesh.position.x += particle.vx;
+                particle.mesh.position.y += particle.vy;
+                particle.mesh.position.z += particle.vz;
+                
+                // Fade out as it rises
+                particle.mesh.material.opacity = Math.max(0, particle.life / 60);
+                particle.mesh.scale.multiplyScalar(0.98);
+                
+                if (particle.life <= 0) {
+                    scene.remove(particle.mesh);
+                    return false;
+                }
+                return true;
+            });
+            
+            // Spawn new fire particles continuously
+            if (disasterState.active && disasterState.type === 'fire' && fireParticles.length < disasterState.intensity * 10) {
+                let angle = Math.random() * Math.PI * 2;
+                let distance = Math.random() * (3 + disasterState.intensity);
+                let x = disasterState.x + Math.cos(angle) * distance;
+                let z = disasterState.z + Math.sin(angle) * distance;
+                
+                let fireGeom = new THREE.SphereGeometry(0.2 + Math.random() * 0.4, 8, 8);
+                let fireMat = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(0.05, 1, 0.5 + Math.random() * 0.3),
+                    emissive: 0xFF6600,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                let fireMesh = new THREE.Mesh(fireGeom, fireMat);
+                fireMesh.position.set(x, 0.5, z);
+                
+                scene.add(fireMesh);
+                
+                fireParticles.push({
+                    mesh: fireMesh,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: 0.1 + Math.random() * 0.1,
+                    vz: (Math.random() - 0.5) * 0.2,
+                    life: 60
+                });
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Update cars
+            cars.forEach(car => {
+                // Stop cars when disaster occurs
+                if (!disasterState.carsStoppedByDisaster) {
+                    car.position.x += car.userData.velocityX;
+                    car.position.z += car.userData.velocityZ;
+
+                    // Bounce off edges
+                    if(car.position.x > 20) car.userData.velocityX = Math.abs(car.userData.velocityX) * -1;
+                    if(car.position.x < -20) car.userData.velocityX = Math.abs(car.userData.velocityX);
+                    if(car.position.z > 20) car.userData.velocityZ = Math.abs(car.userData.velocityZ) * -1;
+                    if(car.position.z < -20) car.userData.velocityZ = Math.abs(car.userData.velocityZ);
+                }
+
+                // Rotate wheels (only if moving)
+                if (!disasterState.carsStoppedByDisaster) {
+                    car.children.forEach(child => {
+                        if(child.geometry && child.geometry.type === 'CylinderGeometry') {
+                            let wheelSpeed = Math.sqrt(car.userData.velocityX ** 2 + car.userData.velocityZ ** 2);
+                            child.rotation.x += wheelSpeed * 0.1;
+                        }
+                    });
+                }
+            });
+
+            // Update building collapses
+            buildingMeshes.forEach(building => {
+                if(building.userData.collapseStartTime) {
+                    let elapsed = Date.now() - building.userData.collapseStartTime;
+                    let progress = Math.min(1, elapsed / building.userData.collapseDuration);
+
+                    // Ease-out animation
+                    let easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                    building.rotation.x = building.userData.originalRot.x + building.userData.collapseRotX * easeProgress;
+                    building.rotation.z = building.userData.originalRot.z + building.userData.collapseRotZ * easeProgress;
+                    building.position.y = building.userData.originalPos.y - building.userData.collapseDrop * easeProgress;
+
+                    if(progress >= 1) {
+                        delete building.userData.collapseStartTime;
+                    }
+                }
+            });
+            
+            // Animate walking humans
+            humans.forEach(human => {
+                let data = human.userData;
+                data.walkTime += 0.05;
+                
+                if(data.goingToBunker && data.bunkerTarget) {
+                    // Move towards bunker during disaster
+                    let dx = data.bunkerTarget.x - human.position.x;
+                    let dz = data.bunkerTarget.z - human.position.z;
+                    let dist = Math.sqrt(dx*dx + dz*dz);
+                    
+                    if(dist > 0.5) {
+                        // Move towards bunker at increased speed
+                        let moveSpeed = 0.15;
+                        human.position.x += dx/dist * moveSpeed;
+                        human.position.z += dz/dist * moveSpeed;
+                        
+                        // Face the direction of movement
+                        data.walkDirection = Math.atan2(dz, dx);
+                    }
+                } else {
+                    // Normal random walk behavior
+                    // Update position (random walk with direction changes)
+                    if(Math.random() < 0.02) {
+                        data.walkDirection += (Math.random() - 0.5) * Math.PI * 0.5;
+                    }
+                    human.position.x += Math.cos(data.walkDirection) * data.walkSpeed;
+                    human.position.z += Math.sin(data.walkDirection) * data.walkSpeed;
+                    
+                    // Keep humans in bounds
+                    if(Math.abs(human.position.x) > 20) data.walkDirection = Math.PI - data.walkDirection;
+                    if(Math.abs(human.position.z) > 20) data.walkDirection = -data.walkDirection;
+                }
+                
+                // Animate limbs for walking effect
+                let armSwing = Math.sin(data.walkTime * 0.15) * 0.4;
+                let legSwing = Math.sin(data.walkTime * 0.15) * 0.3;
+                
+                data.leftArm.rotation.z = armSwing;
+                data.rightArm.rotation.z = -armSwing;
+                data.leftLeg.rotation.z = -legSwing;
+                data.rightLeg.rotation.z = legSwing;
+                
+                // Rotate human to face walking direction
+                human.rotation.y = data.walkDirection;
+
+                // Add red signal above human when in disaster
+                if(data.goingToBunker) {
+                    if(!data.redSignal) {
+                        // Create red signal light
+                        let signalGeom = new THREE.SphereGeometry(0.2, 16, 16);
+                        let signalMat = new THREE.MeshPhongMaterial({ 
+                            color: 0xFF0000, 
+                            emissive: 0xFF0000,
+                            shininess: 100
+                        });
+                        data.redSignal = new THREE.Mesh(signalGeom, signalMat);
+                        scene.add(data.redSignal);
+
+                        // Add point light for red glow
+                        let redLight = new THREE.PointLight(0xFF0000, 0.8, 15);
+                        data.redLight = redLight;
+                        scene.add(redLight);
+                    }
+                    // Position red signal above human
+                    data.redSignal.position.set(human.position.x, human.position.y + 2, human.position.z);
+                    if(data.redLight) {
+                        data.redLight.position.set(human.position.x, human.position.y + 2, human.position.z);
+                    }
+                } else {
+                    // Remove red signal when not going to bunker
+                    if(data.redSignal) {
+                        scene.remove(data.redSignal);
+                        if(data.redLight) scene.remove(data.redLight);
+                        data.redSignal = null;
+                        data.redLight = null;
+                    }
+                }
+            });
+            
+            npcs.forEach(npc => {
+                if(npc.userData.state==="alert" && npc.userData.target) {
+                    // Move towards shelter
+                    let dx = npc.userData.target.x - npc.position.x;
+                    let dz = npc.userData.target.z - npc.position.z;
+                    let dist = Math.sqrt(dx*dx+dz*dz);
+                    if(dist>0.1){
+                        npc.position.x += dx/dist*0.05;
+                        npc.position.z += dz/dist*0.05;
+                    }
+                }
+            });
+            
+            // Update flood water and fire particles
+            updateFloodWater();
+            updateFireParticles();
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ML Prediction function with location-based environmental simulation
+        let lastAlertedProbability = 0;
+        
+        function updatePrediction() {
+            // Get current location from disaster controls
+            let locX = parseInt(document.getElementById('disasterX').value) || 0;
+            let locZ = parseInt(document.getElementById('disasterZ').value) || 0;
+            
+            // Simulate environmental conditions based on location
+            // Locations closer to edges have more extreme weather
+            let locationIntensity = (Math.abs(locX) + Math.abs(locZ)) / 40; // 0 to 1
+            
+            // Auto-calculate temperature based on location (higher near edges)
+            let temp = 20 + (locationIntensity * 25); // 20-45°C
+            
+            // Auto-calculate humidity based on location (higher near edges)
+            let humidity = 40 + (locationIntensity * 50); // 40-90%
+            
+            // Auto-calculate pressure based on location (lower near edges = higher risk)
+            let pressure = 1000 - (locationIntensity * 40); // 960-1000 hPa
+            
+            // Get current time (0-24 hours, cycling every 120 seconds for demo)
+            let currentSeconds = (Date.now() / 1000) % 120; // 0-120 seconds
+            let timeOfDay = (currentSeconds / 120) * 24; // 0-24 hours
+            
+            // Update input fields to show current simulated values
+            document.getElementById('env-temp').value = temp.toFixed(1);
+            document.getElementById('env-humidity').value = humidity.toFixed(1);
+            document.getElementById('env-pressure').value = pressure.toFixed(1);
+            document.getElementById('env-time').value = timeOfDay.toFixed(1);
+            
+            // Call prediction endpoint
+            fetch('http://localhost:5001/predict-disaster', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    temperature: temp,
+                    humidity: humidity,
+                    pressure: pressure,
+                    location_x: locX,
+                    location_z: locZ,
+                    time_of_day: timeOfDay
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI with prediction results
+                    let prob = data.disaster_probability;
+                    let riskLevel = data.risk_level;
+                    let willOccur = data.will_occur;
+                    
+                    // Update text elements
+                    document.getElementById('risk-level').textContent = riskLevel;
+                    document.getElementById('risk-level').className = `prediction-value risk-${riskLevel.toLowerCase()}`;
+                    document.getElementById('risk-prob').textContent = prob.toFixed(1) + '%';
+                    document.getElementById('will-occur').textContent = willOccur ? 'YES' : 'No';
+                    
+                    // Update risk bar position
+                    let percent = Math.min(100, Math.max(0, prob));
+                    document.getElementById('risk-indicator').style.left = percent + '%';
+                    
+                    // Alert if probability crosses threshold (70%) and hasn't been alerted recently
+                    if (prob >= 70 && lastAlertedProbability < 70) {
+                        triggerDisasterAlert(prob, riskLevel);
+                        lastAlertedProbability = prob;
+                    } else if (prob < 70) {
+                        lastAlertedProbability = 0; // Reset alert threshold when below 70%
+                    }
+                    
+                    console.log('Prediction updated:', data);
+                } else {
+                    console.error('Prediction failed:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching prediction:', error);
+            });
+        }
+        
+        // Trigger disaster alert when probability is high
+        function triggerDisasterAlert(probability, riskLevel) {
+            let phoneNumber = document.getElementById('alertPhone').value;
+            let city = document.getElementById('city').value;
+            let locX = parseInt(document.getElementById('disasterX').value) || 0;
+            let locZ = parseInt(document.getElementById('disasterZ').value) || 0;
+            
+            // Show alert on screen
+            let alertDiv = document.getElementById('alerts');
+            alertDiv.innerText = "⚠️ DISASTER PREDICTION ALERT!\n" +
+                "Risk Level: " + riskLevel + "\n" +
+                "Probability: " + probability.toFixed(1) + "%\n" +
+                "Location: (" + locX + ", " + locZ + ")\n" +
+                "City: " + city.toUpperCase();
+            
+            // Send SMS if phone number is provided
+            if (phoneNumber) {
+                console.log('Sending disaster prediction alert SMS...');
+                fetch('http://localhost:5001/send-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        message: `⚠️ DISASTER PREDICTION ALERT!\nRisk Level: ${riskLevel}\nProbability: ${probability.toFixed(1)}%\nLocation: (${locX}, ${locZ})\nCity: ${city.toUpperCase()}\nPrepare to evacuate!`
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alertDiv.innerText += "\n\n✓ ALERT SMS SENT!";
+                    }
+                })
+                .catch(error => console.error('Error sending alert SMS:', error));
+                
+                // Make prediction alert call
+                console.log('Making disaster prediction alert call...');
+                let bunkerPos = (window.bunkerPositions && window.bunkerPositions[city]) ? window.bunkerPositions[city] : null;
+                let distanceToBunker = null;
+                if (bunkerPos) {
+                    let dx = locX - bunkerPos.x;
+                    let dz = locZ - bunkerPos.z;
+                    distanceToBunker = Math.hypot(dx, dz);
+                    distanceToBunker = Math.round(distanceToBunker * 10) / 10;
+                }
+                
+                fetch('http://localhost:5001/make-call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        message: `DISASTER PREDICTION ALERT! The ML model predicts a ${riskLevel} risk of disaster with ${probability.toFixed(1)} percent probability. A disaster is predicted to occur at location ${city}. Immediately prepare to evacuate and head to the nearest bunker!`,
+                        location: { x: locX, z: locZ },
+                        place: city,
+                        distance: distanceToBunker
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alertDiv.innerText += "\n✓ ALERT CALL INITIATED!";
+                    }
+                })
+                .catch(error => console.error('Error making alert call:', error));
+            }
+        }
+        
+        // Auto-update prediction every 1 second (faster to capture location changes)
+        setInterval(updatePrediction, 1000);
+        
+        // Initial prediction update
+        updatePrediction();
+
+        // Handle UI logic
+        function testSMS() {
+            let phoneNumber = document.getElementById('alertPhone').value;
+            if (!phoneNumber) {
+                alert('Please enter a phone number first');
+                return;
+            }
+            console.log('Testing SMS to ' + phoneNumber);
+            fetch('http://localhost:5001/send-sms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber,
+                    message: 'TEST SMS FROM DISASTER APP'
+                })
+            })
+            .then(response => {
+                console.log('Response received:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Test SMS response:', data);
+                alert('SMS Test Result: ' + (data.success ? 'SUCCESS' : 'FAILED: ' + data.error));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending test SMS: ' + error.message);
+            });
+        }
+
+        function testCall() {
+            let phoneNumber = document.getElementById('alertPhone').value;
+            if (!phoneNumber) {
+                alert('Please enter a phone number first');
+                return;
+            }
+            console.log('Testing call to ' + phoneNumber);
+            // include location and place so the spoken message can mention coordinates and nearest place
+            let city = document.getElementById('city').value;
+            let locX = parseInt(document.getElementById('disasterX').value) || 0;
+            let locZ = parseInt(document.getElementById('disasterZ').value) || 0;
+            let bunkerPos = (window.bunkerPositions && window.bunkerPositions[city]) ? window.bunkerPositions[city] : null;
+            // Send city name as place (will be spoken as whole word, not spelled out)
+            let placeStr = city;
+            let distanceToBunker = null;
+            if (bunkerPos) {
+                let dx = locX - bunkerPos.x;
+                let dz = locZ - bunkerPos.z;
+                distanceToBunker = Math.hypot(dx, dz);
+                // round to one decimal place
+                distanceToBunker = Math.round(distanceToBunker * 10) / 10;
+            }
+            fetch('http://localhost:5001/make-call', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber,
+                    message: 'This is a test call from the disaster alert system.',
+                    location: { x: locX, z: locZ },
+                    place: placeStr,
+                    distance: distanceToBunker
+                })
+            })
+            .then(response => {
+                console.log('Response received:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Test call response:', data);
+                alert('Call Test Result: ' + (data.success ? 'SUCCESS - Call initiated' : 'FAILED: ' + data.error));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error initiating test call: ' + error.message);
+            });
+        }
+
+        function triggerDisaster() {
+            let disaster = document.getElementById('disaster').value;
+            if (disaster === "none") return;
+            let city = document.getElementById('city').value;
+            
+            // Clean up old water and fire effects
+            if (waterMesh) {
+                scene.remove(waterMesh);
+                waterMesh = null;
+            }
+            fireParticles.forEach(particle => scene.remove(particle.mesh));
+            fireParticles = [];
+            
+            // Update disaster state
+            disasterState.type = disaster;
+            disasterState.intensity = parseInt(document.getElementById('intensity').value);
+            disasterState.x = parseInt(document.getElementById('disasterX').value);
+            disasterState.z = parseInt(document.getElementById('disasterZ').value);
+            disasterState.active = true;
+            disasterState.carsStoppedByDisaster = true; // Stop all cars when disaster occurs
+
+            // Show disaster marker at position
+            if(disasterState.centerMarker) scene.remove(disasterState.centerMarker);
+            let markerGeom = new THREE.SphereGeometry(0.5, 16, 16);
+            let markerMat = new THREE.MeshPhongMaterial({ color: 0xFF0000, emissive: 0xFF0000 });
+            disasterState.centerMarker = new THREE.Mesh(markerGeom, markerMat);
+            disasterState.centerMarker.position.set(disasterState.x, 2, disasterState.z);
+            scene.add(disasterState.centerMarker);
+            
+            // Show alert
+            document.getElementById('alerts').innerText = "ALERT: " + disaster.toUpperCase() +
+"\nHead to nearest bunker!";
+            
+            // Send SMS notification
+            let phoneNumber = document.getElementById('alertPhone').value;
+            if (phoneNumber) {
+                console.log('Sending SMS to Twilio server...');
+                fetch('http://localhost:5001/send-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        message: `ALERT DISASTER OCCURRED!!!\nType: ${disaster.toUpperCase()}\nIntensity: ${disasterState.intensity}/10\nLocation: ${city.toUpperCase()}\nPlease seek shelter immediately!`
+                    })
+                })
+                .then(response => {
+                    console.log('Response received:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('SMS response data:', data);
+                    if(data.success) {
+                        document.getElementById('alerts').innerText += "\n\n✓ SMS SENT!";
+                    } else {
+                        document.getElementById('alerts').innerText += "\n\n❌ SMS Failed: " + (data.error || 'Unknown error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending SMS:', error);
+                    document.getElementById('alerts').innerText += "\n\n❌ SMS Failed: " + error.message;
+                });
+
+                // Also make a phone call
+                console.log('Making phone call to ' + phoneNumber);
+                fetch('http://localhost:5001/make-call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // include structured location, place and distance for clearer spoken alerts
+                    body: (function(){
+                        let payload = {
+                            phoneNumber: phoneNumber,
+                            message: `DISASTER ALERT! A ${disaster.toUpperCase()} with intensity ${disasterState.intensity} out of 10 has occurred in ${city.toUpperCase()}. Please seek shelter immediately at the nearest bunker!`,
+                            location: { x: disasterState.x, z: disasterState.z },
+                            place: city
+                        };
+                        try {
+                            if(window.bunkerPositions && window.bunkerPositions[city]){
+                                let bp = window.bunkerPositions[city];
+                                let dx = disasterState.x - bp.x;
+                                let dz = disasterState.z - bp.z;
+                                let d = Math.hypot(dx, dz);
+                                d = Math.round(d * 10) / 10;
+                                payload.distance = d;
+                            } else {
+                                payload.distance = null;
+                            }
+                        } catch(e) {
+                            payload.distance = null;
+                        }
+                        return JSON.stringify(payload);
+                    })()
+                })
+                .then(response => {
+                    console.log('Call response received:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Call response data:', data);
+                    if(data.success) {
+                        document.getElementById('alerts').innerText += "\n✓ CALL INITIATED!";
+                    } else {
+                        document.getElementById('alerts').innerText += "\n⚠ Call failed: " + (data.error || 'Unknown error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error making call:', error);
+                    document.getElementById('alerts').innerText += "\n⚠ Call error: " + error.message;
+                });
+            } else {
+                console.log('No phone number provided; skipping SMS and call.');
+            }
+            // Send email notification (if configured)
+            try {
+                sendEmailNotification(disaster, disasterState.intensity, city);
+            } catch(e) {
+                console.error('Error invoking sendEmailNotification:', e);
+            }
+            
+            // Make all humans go to bunker with red signals
+            let bunkerPos = window.bunkerPositions[city];
+            humans.forEach(human => {
+                human.userData.goingToBunker = true;
+                human.userData.bunkerTarget = bunkerPos;
+            });
+            
+            // Create visual effects based on disaster type
+            if (disaster === 'flood') {
+                createFloodWater();
+            } else if (disaster === 'fire') {
+                createFireParticles();
+            }
+            
+            // Trigger disaster control
+            controlDisaster(disaster, 'start');
+        }
+
+        // Function to move disaster center
+        function moveDisaster() {
+            if(!disasterState.active) {
+                alert('No active disaster to move!');
+                return;
+            }
+            
+            disasterState.x = parseInt(document.getElementById('disasterX').value);
+            disasterState.z = parseInt(document.getElementById('disasterZ').value);
+
+            // Update marker position
+            if(disasterState.centerMarker) {
+                disasterState.centerMarker.position.set(disasterState.x, 2, disasterState.z);
+            }
+
+            // Apply new collapse effects from new position
+            let intensity = disasterState.intensity;
+            let collapseRange = 5 + intensity * 3;
+
+            buildingMeshes.forEach(building => {
+                if(building.userData.isBuilding && !building.userData.collapseStartTime) {
+                    let dx = building.position.x - disasterState.x;
+                    let dz = building.position.z - disasterState.z;
+                    let distance = Math.sqrt(dx*dx + dz*dz);
+
+                    // Collapse if within new range
+                    if(distance <= collapseRange) {
+                        building.userData.collapseStartTime = Date.now() + Math.random() * 200;
+                        building.userData.collapseDuration = 1500 - (intensity * 100) + Math.random() * 500;
+                        building.userData.collapseRotX = (Math.random() - 0.5) * (Math.PI / 2) * (intensity / 5);
+                        building.userData.collapseRotZ = (Math.random() - 0.5) * (Math.PI / 2) * (intensity / 5);
+                        building.userData.collapseDrop = (3 + Math.random() * 4) * (intensity / 5);
+                    }
+                }
+            });
+
+            alert('Disaster moved to X: ' + disasterState.x + ', Z: ' + disasterState.z);
+        }
+        document.getElementById('city').addEventListener('change', function(){
+            spawnCity(this.value);
+            document.getElementById('alerts').innerText = '';
+            disasterState.active = false;
+            disasterState.carsStoppedByDisaster = false;
+            if(disasterState.centerMarker) scene.remove(disasterState.centerMarker);
+            
+            // Clean up water and fire effects
+            if (waterMesh) {
+                scene.remove(waterMesh);
+                waterMesh = null;
+            }
+            fireParticles.forEach(particle => scene.remove(particle.mesh));
+            fireParticles = [];
+        });
+
+        // Update intensity display
+        document.getElementById('intensity').addEventListener('input', function(){
+            document.getElementById('intensityValue').innerText = this.value;
+            disasterState.intensity = parseInt(this.value);
+        });
+
+        // Update disaster X position display
+        document.getElementById('disasterX').addEventListener('input', function(){
+            document.getElementById('disasterXValue').innerText = this.value;
+        });
+
+        // Update disaster Z position display
+        document.getElementById('disasterZ').addEventListener('input', function(){
+            document.getElementById('disasterZValue').innerText = this.value;
+        });
+
+        // Start with Bengaluru
+        spawnCity('bengaluru');
+    </script>
+</body>
+</html>
