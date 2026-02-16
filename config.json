@@ -15,27 +15,27 @@
     "navigation": [
         {
             "label": "🏠 Home",
-            "link": "/index.html"
+            "link": "index.html"
         },
         {
             "label": "🌍 Globe Explorer",
-            "link": "/globe.html"
+            "link": "globe.html"
         },
         {
             "label": "🌦️ Weather",
-            "link": "/open.html"
+            "link": "open.html"
         },
         {
             "label": "🤖 ML Insights",
-            "link": "/ML.html"
+            "link": "ML.html"
         },
         {
             "label": "🚀 Simulation",
-            "link": "/simulation.html"
+            "link": "simulation.html"
         },
         {
             "label": "📞 Contact",
-            "link": "/Contact.html"
+            "link": "Contact.html"
         }
     ]
 }
