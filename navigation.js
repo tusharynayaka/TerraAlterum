@@ -41,12 +41,12 @@ async function loadNavigation() {
 
 function renderFallbackNav(navUl) {
     const fallbackNav = [
-        { "label": "🏠 Home", "link": "/index.html" },
-        { "label": "🌍 Globe Explorer", "link": "/globe.html" },
-        { "label": "🌦️ Weather", "link": "/open.html" },
-        { "label": "🤖 ML Insights", "link": "/ML.html" },
-        { "label": "🚀 Simulation", "link": "/simulation.html" },
-        { "label": "📞 Contact", "link": "/Contact.html" }
+        { "label": "🏠 Home", "link": "index.html" },
+        { "label": "🌍 Globe Explorer", "link": "  globe.html" },
+        { "label": "🌦️ Weather", "link": "open.html" },
+        { "label": "🤖 ML Insights", "link": "ML.html" },
+        { "label": "🚀 Simulation", "link": "simulation.html" },
+        { "label": "📞 Contact", "link": "Contact.html" }
     ];
 
     if (navUl) {
