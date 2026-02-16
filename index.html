@@ -1,3 +1,12 @@
+<!--
+This file is the homepage of the TerraAlertum website.
+It provides a modern, responsive landing page with navigation, hero section, feature highlights, project stats, and a call-to-action.
+It serves as a stylish entry point linking to the globe explorer, weather module, machine learning page, and other tools.  
+-->
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,7 +26,6 @@
             line-height: 1.6;
             color: #333;
             background: #f4f4f4;
-            scroll-behavior: smooth;
         }
 
         /* Navigation */
@@ -26,7 +34,7 @@
             padding: 1rem 2rem;
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 100;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -36,22 +44,19 @@
             justify-content: center;
             gap: 2rem;
             flex-wrap: wrap;
-            align-items: center;
         }
 
-        nav ul li a {
+        nav a {
             color: white;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease;
             font-size: 1.1rem;
-            padding: 5px 10px;
-            border-radius: 4px;
         }
 
-        nav ul li a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            text-decoration: none;
+        nav a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
         }
 
         /* Hero Section */
@@ -96,8 +101,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
         }
 
         .btn-primary {
@@ -298,17 +301,13 @@
 </head>
 
 <body>
+    <!-- Navigation -->
     <nav>
-        <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="globe.html">Globe Explorer</a></li>
-            <li><a href="weather.html">Weather</a></li>
-            <li><a href="ml.html">Machine Learning</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
+        <ul></ul>
     </nav>
+    <script src="./navigation.js"></script>
 
+    <!-- Hero Section -->
     <section class="hero" id="home">
         <h1>🌐 TerraAlertum</h1>
         <p>Discover cities around the world with interactive globe visualization and real-time mapping</p>
@@ -319,6 +318,7 @@
         </div>
     </section>
 
+    <!-- Features Section -->
     <section class="features" id="features">
         <h2>🎯 Why Choose TerraAlertum?</h2>
         <div class="features-grid">
@@ -355,6 +355,7 @@
         </div>
     </section>
 
+    <!-- Stats Section -->
     <section class="stats">
         <div class="stats-grid">
             <div class="stat">
@@ -376,8 +377,9 @@
         </div>
     </section>
 
+    <!-- Call to Action Section -->
     <section class="cta" id="contact">
-        <h2>Ready to save innocent lives?</h2>
+        <h2>Ready to save inncoent lives?</h2>
         <p>Starting our CloudScape journey now and discovering new possibilities never before!</p>
         <button class="btn btn-primary" onclick="window.location.href='globe.html'"
             style="padding: 15px 40px; font-size: 1.2rem;">
@@ -385,26 +387,13 @@
         </button>
     </section>
 
+    <!-- Footer -->
     <footer>
         <p>&copy; 2025 TerraAlertum. All rights reserved.</p>
         <p>Powered by <a href="https://globe.gl/" target="_blank">Globe.gl</a> and <a
                 href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a></p>
-        <p>Built with ❤️ by Nimbu Mirchi Ninjas</p>
+        <p>Built with ❤️-Nimbu Mirchi Ninjas</p>
     </footer>
-
-    <script>
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const targetId = this.getAttribute('href');
-                if (targetId.startsWith("#")) {
-                    e.preventDefault();
-                    document.querySelector(targetId).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 
 </html>
