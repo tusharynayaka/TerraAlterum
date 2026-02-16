@@ -1,12 +1,3 @@
-<!--
-This file is the homepage of the TerraAlertum website.
-It provides a modern, responsive landing page with navigation, hero section, feature highlights, project stats, and a call-to-action.
-It serves as a stylish entry point linking to the globe explorer, weather module, machine learning page, and other tools.  
--->
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -36,6 +27,7 @@ It serves as a stylish entry point linking to the globe explorer, weather module
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 60px;
         }
 
         nav ul {
@@ -75,22 +67,12 @@ It serves as a stylish entry point linking to the globe explorer, weather module
         .hero h1 {
             font-size: 3.5rem;
             margin-bottom: 1rem;
-            animation: fadeInDown 0.8s ease;
         }
 
         .hero p {
             font-size: 1.3rem;
             margin-bottom: 2rem;
             opacity: 0.95;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            animation: fadeInUp 0.8s ease 0.4s both;
         }
 
         .btn {
@@ -101,16 +83,13 @@ It serves as a stylish entry point linking to the globe explorer, weather module
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-primary {
             background: white;
             color: #667eea;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .btn-secondary {
@@ -119,22 +98,11 @@ It serves as a stylish entry point linking to the globe explorer, weather module
             border: 2px solid white;
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
         /* Features Section */
         .features {
             padding: 4rem 2rem;
             background: white;
-        }
-
-        .features h2 {
             text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: #667eea;
         }
 
         .features-grid {
@@ -150,29 +118,6 @@ It serves as a stylish entry point linking to the globe explorer, weather module
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            color: #667eea;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .feature-card p {
-            color: #666;
-            line-height: 1.8;
         }
 
         /* Stats Section */
@@ -191,40 +136,6 @@ It serves as a stylish entry point linking to the globe explorer, weather module
             margin: 0 auto;
         }
 
-        .stat {
-            padding: 2rem;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        /* Call to Action Section */
-        .cta {
-            background: white;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .cta h2 {
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta p {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            color: #666;
-        }
-
         /* Footer */
         footer {
             background: #333;
@@ -232,168 +143,90 @@ It serves as a stylish entry point linking to the globe explorer, weather module
             padding: 2rem;
             text-align: center;
         }
-
-        footer p {
-            margin: 0.5rem 0;
-        }
-
-        footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1.1rem;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-            }
-
-            .features h2 {
-                font-size: 2rem;
-            }
-
-            nav ul {
-                gap: 1rem;
-            }
-
-            nav a {
-                font-size: 0.95rem;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <!-- Navigation -->
     <nav>
-        <ul></ul>
+        <ul id="main-nav-list">
+        </ul>
     </nav>
-    <script src="./navigation.js"></script>
 
-    <!-- Hero Section -->
     <section class="hero" id="home">
         <h1>🌐 TerraAlertum</h1>
-        <p>Discover cities around the world with interactive globe visualization and real-time mapping</p>
+        <p>Discover cities around the world with interactive globe visualization</p>
         <div class="hero-buttons">
-            <button class="btn btn-primary" onclick="window.location.href='globe.html'">Start Exploring</button>
+            <a href="globe.html" class="btn btn-primary">Start Exploring</a>
             <button class="btn btn-secondary"
-                onclick="document.querySelector('.features').scrollIntoView({behavior: 'smooth'})">Learn More</button>
+                onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">Learn More</button>
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features" id="features">
         <h2>🎯 Why Choose TerraAlertum?</h2>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <h3>Interactive Globe</h3>
-                <p>Explore cities on an interactive 3D globe with smooth animations and auto-rotation capabilities.</p>
+                <h3>🌍 Interactive Globe</h3>
+                <p>Explore cities on an interactive 3D globe with smooth animations.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🗺️</div>
-                <h3>Real-time Maps</h3>
-                <p>View detailed street-level maps using OpenStreetMap integration for accurate location data.</p>
+                <h3>🗺️ Real-time Maps</h3>
+                <p>Detailed street-level maps using OpenStreetMap integration.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔍</div>
-                <h3>Smart Search</h3>
-                <p>Search for any city globally and instantly navigate to it on both globe and map views.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Fast Performance</h3>
-                <p>Optimized rendering with smooth transitions and responsive design for all devices.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📱</div>
-                <h3>Mobile Friendly</h3>
-                <p>Fully responsive interface that works seamlessly on desktop, tablet, and mobile devices.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>Beautiful Design</h3>
-                <p>Modern UI with stunning gradients, smooth animations, and intuitive user experience.</p>
+                <h3>🔍 Smart Search</h3>
+                <p>Search for any city globally and navigate to it instantly.</p>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
     <section class="stats">
         <div class="stats-grid">
             <div class="stat">
-                <div class="stat-number">100+</div>
-                <div class="stat-label">Countries</div>
+                <h3>100+</h3>
+                <p>Countries</p>
             </div>
             <div class="stat">
-                <div class="stat-number">50K+</div>
-                <div class="stat-label">Cities Indexed</div>
+                <h3>50K+</h3>
+                <p>Cities Indexed</p>
             </div>
             <div class="stat">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Availability</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">Free</div>
+                <h3>100%</h3>
+                <p>Free</p>
             </div>
         </div>
     </section>
 
-    <!-- Call to Action Section -->
-    <section class="cta" id="contact">
-        <h2>Ready to save inncoent lives?</h2>
-        <p>Starting our CloudScape journey now and discovering new possibilities never before!</p>
-        <button class="btn btn-primary" onclick="window.location.href='globe.html'"
-            style="padding: 15px 40px; font-size: 1.2rem;">
-            Launch Globe Explorer →
-        </button>
-    </section>
-
-    <!-- Footer -->
     <footer>
-        <p>&copy; 2025 TerraAlertum. All rights reserved.</p>
-        <p>Powered by <a href="https://globe.gl/" target="_blank">Globe.gl</a> and <a
-                href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a></p>
-        <p>Built with ❤️-Nimbu Mirchi Ninjas</p>
+        <p>&copy; 2026 TerraAlertum. Built with ❤️ - Nimbu Mirchi Ninjas</p>
     </footer>
+
+    <script>
+        // Use an array to manage your menu items
+        const menuItems = [
+            { name: "Home", link: "#home" },
+            { name: "Globe", link: "globe.html" },
+            { name: "Weather", link: "weather.html" },
+            { name: "ML Engine", link: "ml.html" },
+            { name: "Features", link: "#features" }
+        ];
+
+        function initNavbar() {
+            const navUl = document.getElementById('main-nav-list');
+            if (navUl) {
+                const navHTML = menuItems.map(item =>
+                    `<li><a href="${item.link}">${item.name}</a></li>`
+                ).join('');
+                navUl.innerHTML = navHTML;
+                console.log("Navbar injected successfully.");
+            } else {
+                console.error("Could not find the navbar container.");
+            }
+        }
+
+        // Run when the DOM is fully loaded to ensure 'main-nav-list' exists
+        document.addEventListener('DOMContentLoaded', initNavbar);
+    </script>
 </body>
 
 </html>
