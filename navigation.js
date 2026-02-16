@@ -11,7 +11,7 @@ async function loadNavigation() {
 
     try {
         // Try to fetch config.json with relative path
-        const response = await fetch('./config.json');
+        const response = await fetch('config.json');
 
         if (!response.ok) {
             throw new Error('Config not found, using fallback');
