@@ -1,17 +1,17 @@
 async function loadNavigation() {
     // Fallback navigation in case config.json fails to load
     const fallbackNav = [
-        { "label": "🏠 Home", "link": "index.html" },
-        { "label": "🌍 Globe Explorer", "link": "globe.html" },
-        { "label": "🌦️ Weather", "link": "open.html" },
-        { "label": "🤖 ML Insights", "link": "ML.html" },
-        { "label": "🚀 Simulation", "link": "simulation.html" },
-        { "label": "📞 Contact", "link": "Contact.html" }
+        { "label": "🏠 Home", "link": "/index.html" },
+        { "label": "🌍 Globe Explorer", "link": "/globe.html" },
+        { "label": "🌦️ Weather", "link": "/open.html" },
+        { "label": "🤖 ML Insights", "link": "/ML.html" },
+        { "label": "🚀 Simulation", "link": "/simulation.html" },
+        { "label": "📞 Contact", "link": "/Contact.html" }
     ];
 
     try {
         // Try to fetch config.json with relative path
-        const response = await fetch('config.json');
+        const response = await fetch('./config.json');
 
         if (!response.ok) {
             throw new Error('Config not found, using fallback');
@@ -41,12 +41,12 @@ async function loadNavigation() {
 
 function renderFallbackNav(navUl) {
     const fallbackNav = [
-        { "label": "🏠 Home", "link": "index.html" },
-        { "label": "🌍 Globe Explorer", "link": "  globe.html" },
-        { "label": "🌦️ Weather", "link": "open.html" },
-        { "label": "🤖 ML Insights", "link": "ML.html" },
-        { "label": "🚀 Simulation", "link": "simulation.html" },
-        { "label": "📞 Contact", "link": "Contact.html" }
+        { "label": "🏠 Home", "link": "/index.html" },
+        { "label": "🌍 Globe Explorer", "link": "/globe.html" },
+        { "label": "🌦️ Weather", "link": "/open.html" },
+        { "label": "🤖 ML Insights", "link": "/ML.html" },
+        { "label": "🚀 Simulation", "link": "/simulation.html" },
+        { "label": "📞 Contact", "link": "/Contact.html" }
     ];
 
     if (navUl) {
