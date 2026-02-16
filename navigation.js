@@ -1,12 +1,12 @@
 async function loadNavigation() {
     // Fallback navigation in case config.json fails to load
     const fallbackNav = [
-        { "label": "🏠 Home", "link": "/index.html" },
-        { "label": "🌍 Globe Explorer", "link": "/globe.html" },
-        { "label": "🌦️ Weather", "link": "/open.html" },
-        { "label": "🤖 ML Insights", "link": "/ML.html" },
-        { "label": "🚀 Simulation", "link": "/simulation.html" },
-        { "label": "📞 Contact", "link": "/Contact.html" }
+        { "label": "🏠 Home", "link": "index.html" },
+        { "label": "🌍 Globe Explorer", "link": "globe.html" },
+        { "label": "🌦️ Weather", "link": "open.html" },
+        { "label": "🤖 ML Insights", "link": "ML.html" },
+        { "label": "🚀 Simulation", "link": "simulation.html" },
+        { "label": "📞 Contact", "link": "Contact.html" }
     ];
 
     try {
