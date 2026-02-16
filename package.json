@@ -1,0 +1,15 @@
+{
+  "name": "terra-alertum",
+  "version": "1.0.0",
+  "description": "Disaster Alert System with 3D Globe and ML Simulation",
+  "main": "app.py",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "backend": "python app.py"
+  },
+  "dependencies": {
+    "vite": "^5.0.0"
+  }
+}

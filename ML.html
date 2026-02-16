@@ -1,6 +1,7 @@
 <!--This a simple timy ml model to predict disaster and ansalyze it for future occurances and patterns-->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             scroll-behavior: smooth;
         }
@@ -43,62 +45,39 @@
            NAVIGATION & HEADER
            ==================================== */
         .navbar-custom {
-            background: var(--gradient);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
+            padding: 1rem 2rem;
             position: sticky;
             top: 0;
             z-index: 1000;
         }
 
-        .navbar-custom .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white !important;
+        .navbar-custom .container-custom {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .navbar-custom ul {
+            list-style: none;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-direction: column;
-            text-align: left;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
         }
 
-        .navbar-custom .navbar-brand small {
-            font-size: 0.75rem;
-            opacity: 0.9;
-        }
-
-        .navbar-custom .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
+        .navbar-custom a {
+            color: white !important;
+            text-decoration: none;
             font-weight: 600;
-            margin: 0 10px;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: opacity 0.3s ease;
+            font-size: 1.1rem;
         }
 
-        .navbar-custom .nav-link:hover {
-            color: white !important;
-            transform: translateY(-2px);
-        }
-
-        .navbar-custom .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: white;
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .navbar-custom .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .navbar-custom .nav-link.active {
-            color: white !important;
-            border-bottom: 3px solid white;
+        .navbar-custom a:hover {
+            opacity: 0.8;
         }
 
         /* ====================================
@@ -162,17 +141,56 @@
             margin-bottom: 1.5rem;
         }
 
-        .btn-primary { background-color: var(--primary); border-color: var(--primary); }
-        .btn-primary:hover { background-color: var(--secondary); border-color: var(--secondary); }
-        .btn-success { background-color: var(--success); border-color: var(--success); }
-        .btn-success:hover { background-color: #27ae60; border-color: #27ae60; }
-        .btn-info { background-color: var(--info); border-color: var(--info); }
-        .btn-info:hover { background-color: #2980b9; border-color: #2980b9; }
-        .btn-warning { background-color: var(--warning); border-color: var(--warning); }
-        .btn-warning:hover { background-color: #e67e22; border-color: #e67e22; }
-        .btn-danger { background-color: var(--danger); border-color: var(--danger); }
-        .btn-danger:hover { background-color: #c0392b; border-color: #c0392b; }
-        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            border-color: var(--info);
+        }
+
+        .btn-info:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+            border-color: #e67e22;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+
         .feature-list {
             background-color: #f8f9fa;
             color: #2c3e50;
@@ -303,8 +321,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* ====================================
@@ -358,6 +381,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Back Button -->
     <button class="back-button" onclick="location.href='2.html'"><i class="fas fa-arrow-left"></i> Back to Main</button>
@@ -365,23 +389,13 @@
     <!-- Navigation -->
     <nav class="navbar-custom">
         <div class="container-custom">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <div class="navbar-brand">
-                    <div><i class="fas fa-robot"></i> Advanced ML Disaster Prediction</div>
-                    <small>AI-Powered Risk Assessment System</small>
-                </div>
-                <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: center;">
-                    <a href="#" class="nav-link active" onclick="switchTab('disaster')">📊 Database</a>
-                    <a href="#" class="nav-link" onclick="switchTab('location')">📍 Location</a>
-                    <a href="#" class="nav-link" onclick="switchTab('ml-advanced')">🔬 ML</a>
-                    <a href="#" class="nav-link" onclick="switchTab('analytics')">📊 Analytics</a>
-                </div>
-            </div>
+            <ul></ul>
         </div>
     </nav>
+    <script src="/navigation.js"></script>
 
     <div style="padding: 3rem 0;">
-        
+
         <!-- ===== DISASTER DATABASE TAB ===== -->
         <div id="disaster" class="tab-content active">
             <div class="ml-section">
@@ -394,13 +408,17 @@
                                 <select class="form-select mb-3" id="disaster-select">
                                     <option value="">Loading database...</option>
                                 </select>
-                                
-                                <h6 style="margin-top: 1.5rem; font-weight: 700; color: var(--dark);">📋 Feature Analysis</h6>
-                                <div class="feature-list" id="feature-analysis" style="margin-top: 1rem;">Select a disaster scenario</div>
-                                
+
+                                <h6 style="margin-top: 1.5rem; font-weight: 700; color: var(--dark);">📋 Feature
+                                    Analysis</h6>
+                                <div class="feature-list" id="feature-analysis" style="margin-top: 1rem;">Select a
+                                    disaster scenario</div>
+
                                 <div class="mt-3">
-                                    <button class="btn btn-primary w-100 mb-2" onclick="analyzeDisasterDatabase()"><i class="fas fa-eye"></i> Analyze</button>
-                                    <button class="btn btn-info w-100" onclick="showDatabaseStats()"><i class="fas fa-chart-bar"></i> Statistics</button>
+                                    <button class="btn btn-primary w-100 mb-2" onclick="analyzeDisasterDatabase()"><i
+                                            class="fas fa-eye"></i> Analyze</button>
+                                    <button class="btn btn-info w-100" onclick="showDatabaseStats()"><i
+                                            class="fas fa-chart-bar"></i> Statistics</button>
                                 </div>
                             </div>
                         </div>
@@ -443,12 +461,15 @@
                                 <select class="form-select mb-3" id="location-select">
                                     <option value="">Select location...</option>
                                 </select>
-                                
-                                <h6 style="margin-top: 1.5rem; font-weight: 700; color: var(--dark);">🌡️ Location Profile</h6>
-                                <div class="feature-list" id="location-info" style="margin-top: 1rem;">Select a location</div>
-                                
+
+                                <h6 style="margin-top: 1.5rem; font-weight: 700; color: var(--dark);">🌡️ Location
+                                    Profile</h6>
+                                <div class="feature-list" id="location-info" style="margin-top: 1rem;">Select a location
+                                </div>
+
                                 <div class="mt-3">
-                                    <button class="btn btn-info w-100" onclick="analyzeLocationModel()"><i class="fas fa-robot"></i> Analyze Model</button>
+                                    <button class="btn btn-info w-100" onclick="analyzeLocationModel()"><i
+                                            class="fas fa-robot"></i> Analyze Model</button>
                                 </div>
                             </div>
                         </div>
@@ -483,18 +504,22 @@
         <div id="ml-advanced" class="tab-content">
             <div class="ml-section">
                 <h2><i class="fas fa-microscope"></i> Advanced ML Model Analysis</h2>
-                
+
                 <div class="btn-group mb-4" role="group">
-                    <button class="btn btn-success" onclick="switchMLMode('database')"><i class="fas fa-database"></i> Database</button>
-                    <button class="btn btn-info" onclick="switchMLMode('location')"><i class="fas fa-map-location-dot"></i> Location</button>
-                    <button class="btn btn-danger" onclick="switchMLMode('features')"><i class="fas fa-star"></i> Features</button>
+                    <button class="btn btn-success" onclick="switchMLMode('database')"><i class="fas fa-database"></i>
+                        Database</button>
+                    <button class="btn btn-info" onclick="switchMLMode('location')"><i
+                            class="fas fa-map-location-dot"></i> Location</button>
+                    <button class="btn btn-danger" onclick="switchMLMode('features')"><i class="fas fa-star"></i>
+                        Features</button>
                 </div>
 
                 <!-- Database Mode -->
                 <div id="ml-database-mode" style="display: block;">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title" style="color: var(--success);"><i class="fas fa-globe"></i> Global Disaster Database</h5>
+                            <h5 class="card-title" style="color: var(--success);"><i class="fas fa-globe"></i> Global
+                                Disaster Database</h5>
                             <div class="mb-3">
                                 <label style="font-weight: 600; color: var(--dark);">Select Disaster Scenario:</label>
                                 <select id="ml-disaster-select" class="form-select">
@@ -503,13 +528,16 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <button class="btn btn-success btn-sm w-100" onclick="analyzeSelectedDisaster()"><i class="fas fa-eye"></i> Analyze</button>
+                                    <button class="btn btn-success btn-sm w-100" onclick="analyzeSelectedDisaster()"><i
+                                            class="fas fa-eye"></i> Analyze</button>
                                 </div>
                                 <div class="col-md-6">
-                                    <button class="btn btn-primary btn-sm w-100" onclick="showDisasterStats()"><i class="fas fa-chart-bar"></i> Stats</button>
+                                    <button class="btn btn-primary btn-sm w-100" onclick="showDisasterStats()"><i
+                                            class="fas fa-chart-bar"></i> Stats</button>
                                 </div>
                             </div>
-                            <div id="ml-database-output" class="feature-list" style="margin-top: 1.5rem;">Select a disaster scenario</div>
+                            <div id="ml-database-output" class="feature-list" style="margin-top: 1.5rem;">Select a
+                                disaster scenario</div>
                         </div>
                     </div>
                 </div>
@@ -518,7 +546,8 @@
                 <div id="ml-location-mode" style="display: none;">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title" style="color: var(--info);"><i class="fas fa-map-location-dot"></i> Location-Based ML Training</h5>
+                            <h5 class="card-title" style="color: var(--info);"><i class="fas fa-map-location-dot"></i>
+                                Location-Based ML Training</h5>
                             <div class="mb-3">
                                 <label style="font-weight: 600; color: var(--dark);">Select Location:</label>
                                 <select id="ml-location-select" class="form-select">
@@ -527,13 +556,16 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <button class="btn btn-info btn-sm w-100" onclick="trainLocationModel()"><i class="fas fa-robot"></i> Train Model</button>
+                                    <button class="btn btn-info btn-sm w-100" onclick="trainLocationModel()"><i
+                                            class="fas fa-robot"></i> Train Model</button>
                                 </div>
                                 <div class="col-md-6">
-                                    <button class="btn btn-warning btn-sm w-100" onclick="compareLocations()"><i class="fas fa-globe"></i> Compare</button>
+                                    <button class="btn btn-warning btn-sm w-100" onclick="compareLocations()"><i
+                                            class="fas fa-globe"></i> Compare</button>
                                 </div>
                             </div>
-                            <div id="ml-location-output" class="feature-list" style="margin-top: 1.5rem;">Select a location</div>
+                            <div id="ml-location-output" class="feature-list" style="margin-top: 1.5rem;">Select a
+                                location</div>
                         </div>
                     </div>
                 </div>
@@ -542,18 +574,24 @@
                 <div id="ml-features-mode" style="display: none;">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title" style="color: var(--danger);"><i class="fas fa-chart-bar"></i> Feature Importance Analysis</h5>
+                            <h5 class="card-title" style="color: var(--danger);"><i class="fas fa-chart-bar"></i>
+                                Feature Importance Analysis</h5>
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <button class="btn btn-danger btn-sm w-100" onclick="analyzeFeatureImportance()"><i class="fas fa-chart-pie"></i> Importance</button>
+                                    <button class="btn btn-danger btn-sm w-100" onclick="analyzeFeatureImportance()"><i
+                                            class="fas fa-chart-pie"></i> Importance</button>
                                 </div>
                                 <div class="col-md-6">
-                                    <button class="btn btn-primary btn-sm w-100" onclick="generateCorrelationMatrix()"><i class="fas fa-link"></i> Correlations</button>
+                                    <button class="btn btn-primary btn-sm w-100"
+                                        onclick="generateCorrelationMatrix()"><i class="fas fa-link"></i>
+                                        Correlations</button>
                                 </div>
                             </div>
-                            <div id="ml-features-output" class="feature-list" style="margin-bottom: 1.5rem;">Click buttons to analyze</div>
+                            <div id="ml-features-output" class="feature-list" style="margin-bottom: 1.5rem;">Click
+                                buttons to analyze</div>
                             <div class="chart-container">
-                                <div class="chart-title"><i class="fas fa-chart-bar"></i> Feature Importance Ranking</div>
+                                <div class="chart-title"><i class="fas fa-chart-bar"></i> Feature Importance Ranking
+                                </div>
                                 <canvas id="featureImportanceChart"></canvas>
                             </div>
                         </div>
@@ -566,12 +604,16 @@
         <div id="analytics" class="tab-content">
             <div class="ml-section">
                 <h2><i class="fas fa-chart-line"></i> Advanced Analytics Dashboard</h2>
-                
+
                 <div class="btn-group mb-4" role="group">
-                    <button class="btn btn-success" onclick="switchAnalyticsTab('overview')"><i class="fas fa-chart-bar"></i> Overview</button>
-                    <button class="btn btn-warning" onclick="switchAnalyticsTab('heatmap')"><i class="fas fa-fire"></i> Heatmap</button>
-                    <button class="btn btn-info" onclick="switchAnalyticsTab('trends')"><i class="fas fa-chart-line"></i> Trends</button>
-                    <button class="btn btn-danger" onclick="switchAnalyticsTab('predictions')"><i class="fas fa-crystal-ball"></i> Predictions</button>
+                    <button class="btn btn-success" onclick="switchAnalyticsTab('overview')"><i
+                            class="fas fa-chart-bar"></i> Overview</button>
+                    <button class="btn btn-warning" onclick="switchAnalyticsTab('heatmap')"><i class="fas fa-fire"></i>
+                        Heatmap</button>
+                    <button class="btn btn-info" onclick="switchAnalyticsTab('trends')"><i
+                            class="fas fa-chart-line"></i> Trends</button>
+                    <button class="btn btn-danger" onclick="switchAnalyticsTab('predictions')"><i
+                            class="fas fa-crystal-ball"></i> Predictions</button>
                 </div>
 
                 <!-- Overview Section -->
@@ -662,8 +704,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="heatmap-output" class="feature-list" style="min-height: 300px; margin-bottom: 1.5rem;">Click button to generate</div>
-                            <button class="btn btn-warning w-100" onclick="generateRiskHeatmap()"><i class="fas fa-fire"></i> Generate Heatmap</button>
+                            <div id="heatmap-output" class="feature-list"
+                                style="min-height: 300px; margin-bottom: 1.5rem;">Click button to generate</div>
+                            <button class="btn btn-warning w-100" onclick="generateRiskHeatmap()"><i
+                                    class="fas fa-fire"></i> Generate Heatmap</button>
                         </div>
                     </div>
                 </div>
@@ -692,7 +736,8 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-info w-100 mt-3" onclick="analyzeDisasterTrends()"><i class="fas fa-chart-line"></i> Analyze Trends</button>
+                    <button class="btn btn-info w-100 mt-3" onclick="analyzeDisasterTrends()"><i
+                            class="fas fa-chart-line"></i> Analyze Trends</button>
                 </div>
 
                 <!-- Predictions Section -->
@@ -727,7 +772,8 @@
                     </div>
                 </div>
 
-                <button class="btn btn-success w-100 mt-4" onclick="refreshAnalyticsDashboard()"><i class="fas fa-sync-alt"></i> Refresh Dashboard</button>
+                <button class="btn btn-success w-100 mt-4" onclick="refreshAnalyticsDashboard()"><i
+                        class="fas fa-sync-alt"></i> Refresh Dashboard</button>
             </div>
         </div>
 
@@ -869,7 +915,7 @@
             document.getElementById('analytics-trends').style.display = 'none';
             document.getElementById('analytics-predictions').style.display = 'none';
             document.getElementById('analytics-' + tab).style.display = 'block';
-            
+
             if (tab === 'overview') updateOverviewMetrics();
             else if (tab === 'trends') createDisasterTrendsCharts();
             else if (tab === 'predictions') createPredictionCharts();
@@ -898,7 +944,7 @@
             initializeMLDatabase();
             const avgTemp = (mlDatabase.features.reduce((sum, f) => sum + f[6], 0) / mlDatabase.features.length).toFixed(1);
             const avgRain = (mlDatabase.features.reduce((sum, f) => sum + f[5], 0) / mlDatabase.features.length).toFixed(0);
-            
+
             const output = `📊 DATABASE STATISTICS\n════════════════════════════════════════\nTotal Scenarios: ${mlDatabase.disasters.length}\nLocations: ${mlDatabase.allLocations.length}\nFeatures: 16\n\nAvg Temperature: ${avgTemp}°C\nAvg Rainfall: ${avgRain} mm`;
             document.getElementById('disaster-result').textContent = output;
         }
@@ -918,7 +964,7 @@
             const output = `🤖 LOCATION MODEL\n════════════════════════════════════════\nLocation: ${location}\nTraining Samples: ${indices.length}\nAccuracy: ${accuracy.toFixed(1)}%\n\nStatus: TRAINED & READY`;
             document.getElementById('location-result').textContent = output;
             document.getElementById('location-info').textContent = output;
-            
+
             // Create location charts
             createLocationCharts(location);
         }
@@ -1051,7 +1097,7 @@
         }
 
         function createDisasterCharts(riskScore) {
-            const timelineData = Array.from({length: 180}, (_, i) => {
+            const timelineData = Array.from({ length: 180 }, (_, i) => {
                 const base = riskScore + 0.15 * Math.sin(i * 2 * Math.PI / 90) + 0.03 * (Math.random() - 0.5);
                 return Math.max(0, Math.min(1, base));
             });
@@ -1062,7 +1108,7 @@
             window.riskTimelineChartInstance = new Chart(timelineCtx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({length: 180}, (_, i) => `Day ${i + 1}`),
+                    labels: Array.from({ length: 180 }, (_, i) => `Day ${i + 1}`),
                     datasets: [{
                         label: 'Risk Score',
                         data: timelineData,
@@ -1076,10 +1122,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#ecf0f1' }}},
+                    plugins: { legend: { labels: { color: '#ecf0f1' } } },
                     scales: {
-                        y: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
-                        x: { ticks: { color: '#b0b0b0', maxTicksLimit: 10}}
+                        y: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#b0b0b0', maxTicksLimit: 10 } }
                     }
                 }
             });
@@ -1099,7 +1145,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#ecf0f1' }}}
+                    plugins: { legend: { labels: { color: '#ecf0f1' } } }
                 }
             });
         }
@@ -1124,7 +1170,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#ecf0f1' }}}
+                    plugins: { legend: { labels: { color: '#ecf0f1' } } }
                 }
             });
 
@@ -1153,10 +1199,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
-                        y: { ticks: { color: '#b0b0b0'}}
+                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#b0b0b0' } }
                     },
-                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                    plugins: { legend: { labels: { color: '#b0b0b0' } } }
                 }
             });
         }
@@ -1182,10 +1228,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
-                        x: { ticks: { color: '#b0b0b0'}}
+                        y: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#b0b0b0' } }
                     },
-                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                    plugins: { legend: { labels: { color: '#b0b0b0' } } }
                 }
             });
 
@@ -1210,9 +1256,9 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        r: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}}
+                        r: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } }
                     },
-                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                    plugins: { legend: { labels: { color: '#b0b0b0' } } }
                 }
             });
         }
@@ -1223,8 +1269,8 @@
         }
 
         function createPredictionCharts() {
-            const days = Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
-            const forecastData = Array.from({length: 30}, () => 30 + Math.random() * 40);
+            const days = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
+            const forecastData = Array.from({ length: 30 }, () => 30 + Math.random() * 40);
 
             const forecastCtx = document.getElementById('forecastChart');
             if (window.forecastChartInstance) window.forecastChartInstance.destroy();
@@ -1247,10 +1293,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { min: 0, max: 100, ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
-                        x: { ticks: { color: '#b0b0b0', maxTicksLimit: 10}}
+                        y: { min: 0, max: 100, ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#b0b0b0', maxTicksLimit: 10 } }
                     },
-                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                    plugins: { legend: { labels: { color: '#b0b0b0' } } }
                 }
             });
 
@@ -1272,10 +1318,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
-                        y: { ticks: { color: '#b0b0b0'}}
+                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#b0b0b0' } }
                     },
-                    plugins: { legend: { labels: { color: '#b0b0b0'}}}
+                    plugins: { legend: { labels: { color: '#b0b0b0' } } }
                 }
             });
 
@@ -1318,17 +1364,17 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)'}},
-                        y: { ticks: { color: '#b0b0b0'}}
+                        x: { ticks: { color: '#b0b0b0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#b0b0b0' } }
                     },
-                    plugins: { legend: { labels: { color: '#b0b0b0' }}}
+                    plugins: { legend: { labels: { color: '#b0b0b0' } } }
                 }
             });
         }
 
         function createLocationCharts(location) {
             // Location Timeline Chart
-            const timelineData = Array.from({length: 180}, (_, i) => {
+            const timelineData = Array.from({ length: 180 }, (_, i) => {
                 const baseRisk = 0.4 + 0.3 * Math.sin(i * 2 * Math.PI / 90) + 0.05 * (Math.random() - 0.5);
                 return Math.max(0, Math.min(1, baseRisk));
             });
@@ -1339,7 +1385,7 @@
             window.locationTimelineChartInstance = new Chart(locationTimelineCtx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({length: 180}, (_, i) => `Day ${i + 1}`),
+                    labels: Array.from({ length: 180 }, (_, i) => `Day ${i + 1}`),
                     datasets: [{
                         label: 'Risk Probability',
                         data: timelineData,
@@ -1353,15 +1399,15 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#2c3e50' }}},
+                    plugins: { legend: { labels: { color: '#2c3e50' } } },
                     scales: {
-                        y: { 
+                        y: {
                             min: 0,
                             max: 1,
-                            ticks: { color: '#2c3e50' }, 
-                            grid: { color: 'rgba(0, 0, 0, 0.05)'}
+                            ticks: { color: '#2c3e50' },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
                         },
-                        x: { ticks: { color: '#2c3e50', maxTicksLimit: 10}}
+                        x: { ticks: { color: '#2c3e50', maxTicksLimit: 10 } }
                     }
                 }
             });
@@ -1386,7 +1432,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#2c3e50' }}}
+                    plugins: { legend: { labels: { color: '#2c3e50' } } }
                 }
             });
         }
@@ -1398,7 +1444,7 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initializeMLDatabase();
         });
     </script>

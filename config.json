@@ -1,0 +1,41 @@
+{
+    "api_keys": {
+        "openweather": "e15ee20095f1ca448fd5782b1d106790",
+        "emailjs": {
+            "service_id": "service_qy4ygkn",
+            "template_id": "template_8fxvqyb",
+            "public_key": "cKQvQvfPKXZVDgQTF"
+        }
+    },
+    "app_config": {
+        "name": "TerraAlertum",
+        "version": "2.0.0",
+        "description": "Real-time disaster prediction and alert system"
+    },
+    "navigation": [
+        {
+            "label": "🏠 Home",
+            "link": "/index.html"
+        },
+        {
+            "label": "🌍 Globe Explorer",
+            "link": "/globe.html"
+        },
+        {
+            "label": "🌦️ Weather",
+            "link": "/open.html"
+        },
+        {
+            "label": "🤖 ML Insights",
+            "link": "/ML.html"
+        },
+        {
+            "label": "🚀 Simulation",
+            "link": "/simulation.html"
+        },
+        {
+            "label": "📞 Contact",
+            "link": "/Contact.html"
+        }
+    ]
+}
