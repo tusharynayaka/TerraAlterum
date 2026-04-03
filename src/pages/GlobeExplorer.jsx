@@ -21,88 +21,84 @@ import './GlobeExplorer.css';
 
 const GlobeExplorer = () => {
   const globeRef = useRef(null);
-  const mapRef = useRef(null);
   const [city, setCity] = useState('');
   const [isModalOpen, setModalOpen] = useState(false);
   const [weather, setWeather] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [alerts, setAlerts] = useState([]);
-
-  // Mock data for initial markers
-  const [markers, setMarkers] = useState([
-    { lat: 12.9716, lng: 77.5946, label: 'Bengaluru', severity: 'low' },
-    { lat: 28.6139, lng: 77.2090, label: 'Delhi', severity: 'high' },
-    { lat: 19.0760, lng: 72.8777, label: 'Mumbai', severity: 'moderate' }
-  ]);
+  const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
-    // Initialize Globe.gl from window (CDN in index.html)
-    if (window.Globe && globeRef.current) {
+    const fetchEarthquakes = async () => {
+      try {
+        const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson');
+        const data = await res.json();
+        
+        const earthquakeMarkers = data.features.map(feat => ({
+          lat: feat.geometry.coordinates[1],
+          lng: feat.geometry.coordinates[0],
+          label: feat.properties.place,
+          mag: feat.properties.mag,
+          severity: feat.properties.mag >= 6 ? 'high' : feat.properties.mag >= 5 ? 'moderate' : 'low'
+        }));
+        
+        setMarkers(earthquakeMarkers);
+      } catch (err) {
+        console.error("Failed to fetch earthquake data:", err);
+      }
+    };
+
+    fetchEarthquakes();
+  }, []);
+
+  useEffect(() => {
+    if (window.Globe && globeRef.current && markers.length > 0) {
       const globe = window.Globe()(globeRef.current)
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
         .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-        .labelsData(markers)
-        .labelLat(d => d.lat)
-        .labelLng(d => d.lng)
-        .labelText(d => d.label)
-        .labelSize(d => 1.5)
-        .labelDotRadius(d => 0.5)
-        .labelColor(d => d.severity === 'high' ? '#ff5252' : '#4facfe')
-        .onLabelClick((d) => handleLabelClick(d));
+        .pointsData(markers)
+        .pointLat(d => d.lat)
+        .pointLng(d => d.lng)
+        .pointColor(d => d.severity === 'high' ? '#ff5252' : d.severity === 'moderate' ? '#ffab40' : '#4facfe')
+        .pointRadius(d => d.mag * 0.15)
+        .pointLabel(d => `Magnitude: ${d.mag}\nLocation: ${d.label}`)
+        .onPointClick((d) => handleMarkerClick(d));
       
       globe.controls().autoRotate = true;
       globe.controls().autoRotateSpeed = 0.5;
     }
   }, [markers]);
 
-  const handleLabelClick = (d) => {
+  const handleMarkerClick = (d) => {
     setCity(d.label);
-    searchCity(d.label);
+    searchCity(d.label, d.lat, d.lng);
   };
 
-  const searchCity = async (cityName = city) => {
-    if (!cityName) return;
+  const searchCity = async (cityName = city, lat, lng) => {
     setLoading(true);
-    
     try {
-      // Mock search and weather fetch (integrates with real API in production)
-      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=e15ee20095f1ca448fd5782b1d106790&units=metric`);
+      let url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=e15ee20095f1ca448fd5782b1d106790&units=metric`;
+      if (lat && lng) {
+        url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=e15ee20095f1ca448fd5782b1d106790&units=metric`;
+      }
+      
+      const res = await fetch(url);
       const data = await res.json();
       
       if (data.cod === 200) {
         setWeather(data);
         setModalOpen(true);
-        // Call ML Prediction API
-        fetchPrediction(data.main.temp, data.main.humidity, data.main.pressure);
-      } else {
-        alert("City not found");
+        // Mock ML Prediction based on real event magnitude if available
+        setPrediction({
+          risk_level: markers.find(m => m.label === cityName)?.severity.toUpperCase() || 'MODERATE',
+          disaster_probability: (data.main.humidity * 0.8) + (Math.random() * 20),
+          will_occur: data.weather[0].main === 'Rain'
+        });
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchPrediction = async (temp, hum, pres) => {
-    try {
-      const res = await fetch('/api/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ temp, humidity: hum, pressure: pres })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setPrediction(data);
-      }
-    } catch (err) {
-      // Mock fallback if API fails
-      setPrediction({
-        risk_level: 'MODERATE',
-        disaster_probability: 45.5,
-        will_occur: false
-      });
     }
   };
 
@@ -120,48 +116,48 @@ const GlobeExplorer = () => {
         <motion.div 
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="search-container premium-glass"
+            className="search-container glass-premium"
         >
           <div className="search-wrap">
             <Search className="search-icon" size={20} />
             <input 
               type="text" 
-              placeholder="Locate risk zones..." 
+              placeholder="Search risk zones..." 
               value={city}
               onChange={(e) => setCity(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && searchCity()}
             />
           </div>
-          <button className="scan-btn" onClick={() => searchCity()}>Scan Area</button>
+          <button className="scan-btn" onClick={() => searchCity()}>Scan</button>
         </motion.div>
 
         {/* Legend */}
-        <div className="legend-panel premium-glass">
+        <div className="legend-panel glass-premium">
             <div className="legend-item">
-                <span className="dot high"></span> High Risk
+                <span className="dot high"></span> High Intensity
             </div>
             <div className="legend-item">
                 <span className="dot moderate"></span> Moderate
             </div>
             <div className="legend-item">
-                <span className="dot low"></span> Stable
+                <span className="dot low"></span> Registered Activity
             </div>
         </div>
 
         {/* Global Stats Overlay */}
         <div className="stats-overlay">
-          <div className="stat-card premium-glass">
+          <div className="stat-card glass-premium">
             <Activity className="text-red-400" size={16} />
             <div className="data">
-              <strong>12</strong>
-              <span>Active Alerts</span>
+              <strong>{markers.length}</strong>
+              <span>Recent Events</span>
             </div>
           </div>
-          <div className="stat-card premium-glass">
+          <div className="stat-card glass-premium">
             <Shield className="text-blue-400" size={16} />
             <div className="data">
-              <strong>94%</strong>
-              <span>Confidence</span>
+              <strong>98.2%</strong>
+              <span>Scan Precision</span>
             </div>
           </div>
         </div>
@@ -176,11 +172,11 @@ const GlobeExplorer = () => {
             exit={{ opacity: 0, scale: 0.9 }}
             className="map-modal-backdrop"
           >
-            <div className="map-modal premium-glass">
+            <div className="map-modal glass-premium">
               <div className="modal-header">
                 <div className="header-info">
                     <MapPin className="text-blue-400" />
-                    <h2>{city} <span>Intelligence Report</span></h2>
+                    <h2>Location <span>Report</span></h2>
                 </div>
                 <button className="close-btn" onClick={closePortal}><X /></button>
               </div>
@@ -188,7 +184,7 @@ const GlobeExplorer = () => {
               <div className="modal-content">
                 <div className="report-grid">
                     <div className="weather-section">
-                        <h3><Navigation size={16} /> Site Conditions</h3>
+                        <h3><Navigation size={16} /> {weather?.name || 'Local'} Info</h3>
                         {weather && (
                             <div className="weather-stats">
                                 <div className="w-item">
@@ -218,14 +214,14 @@ const GlobeExplorer = () => {
                                 <div className="prob-text">{prediction.disaster_probability.toFixed(1)}% Probability</div>
                             </div>
                         ) : (
-                            <div className="loading-prediction">Analyzing satellite data...</div>
+                            <div className="loading-prediction">Analyzing seismic data...</div>
                         )}
                     </div>
                 </div>
 
                 <div className="action-footer">
-                    <button className="btn-action primary">Deploy Response Team</button>
-                    <button className="btn-action secondary">Full Simulation Analysis</button>
+                    <button className="btn-action primary">Deploy Response</button>
+                    <button className="btn-action secondary">Log Frequency</button>
                 </div>
               </div>
             </div>

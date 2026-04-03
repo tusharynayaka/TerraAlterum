@@ -1,58 +1,9 @@
 .weather-page {
     position: relative;
-    width: 100vw;
-    min-height: 100vh;
-    overflow-x: hidden;
-    background: #0f172a;
-    color: #f8fafc;
-    font-family: 'Inter', sans-serif;
-    padding: 40px 20px;
-}
-
-/* Glassmorphism Blobs */
-.blobs {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.blob {
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.4;
-}
-
-.blob-1 {
-    background: #4facfe;
-    top: -100px;
-    left: -100px;
-}
-
-.blob-2 {
-    background: #764ba2;
-    bottom: -100px;
-    right: -100px;
-}
-
-.blob-3 {
-    background: #ff5252;
-    top: 40%;
-    left: 50%;
-    width: 300px;
-    height: 300px;
+    z-index: 10;
 }
 
 .weather-container {
-    position: relative;
-    z-index: 10;
     max-width: 1000px;
     margin: 0 auto;
 }
@@ -62,28 +13,30 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 40px;
-    flex-wrap: wrap;
     gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .weather-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 .logo-area {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .weather-logo-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
 }
 
 .logo-area h1 {
     font-size: 1.5rem;
     font-weight: 800;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #fff 0%, #aaa 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .search-form {
@@ -95,94 +48,75 @@
 
 .search-input-wrapper {
     flex: 1;
-    position: relative;
     display: flex;
     align-items: center;
-}
-
-.search-icon {
-    position: absolute;
-    left: 12px;
-    color: #94a3b8;
+    padding: 0 15px;
 }
 
 .search-input-wrapper input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 12px;
     width: 100%;
-    padding: 12px 12px 12px 40px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: white;
     outline: none;
-    transition: all 0.3s;
-}
-
-.search-input-wrapper input:focus {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #4facfe;
-    box-shadow: 0 0 15px rgba(79, 172, 254, 0.2);
+    font-family: inherit;
 }
 
 .glass-btn {
-    padding: 12px 20px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 10px 20px;
     border-radius: 12px;
-    color: white;
-    font-weight: 600;
     cursor: pointer;
+    font-weight: 600;
     transition: all 0.3s;
-}
-
-.glass-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-}
-
-.icon-btn {
-    padding: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.glass-premium {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+}
+
+.icon-btn {
+    padding: 10px;
+}
+
+/* Current Card */
+.current-card {
+    padding: 40px;
     margin-bottom: 40px;
 }
 
 .card-top {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
+    align-items: flex-start;
+    margin-bottom: 40px;
 }
 
 .location-info h2 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 4px;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -1px;
 }
 
-.condition {
+.location-info .condition {
     font-size: 1.1rem;
-    color: #94a3b8;
+    color: var(--muted);
     text-transform: capitalize;
+    margin-top: 5px;
 }
 
 .main-temp {
-    font-size: 4rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 4.5rem;
+    font-weight: 950;
+    letter-spacing: -3px;
+    color: var(--accent);
 }
 
 .stats-grid {
@@ -192,28 +126,26 @@
 }
 
 .stat-item {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 16px;
-    border-radius: 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 15px;
+    padding: 20px;
 }
 
 .stat-val span {
     display: block;
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stat-val strong {
-    font-size: 1.1rem;
     font-weight: 700;
 }
 
+.stat-val strong {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+/* Forecast */
 .forecast-section {
     margin-top: 40px;
 }
@@ -223,67 +155,90 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
-    color: #94a3b8;
+}
+
+.section-title h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
 .forecast-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
 }
 
-.glass-simple {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 20px;
+.forecast-card {
+    padding: 25px 15px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    transition: all 0.3s;
-}
-
-.glass-simple:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(-5px);
 }
 
 .forecast-card .day {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: #64748b;
-    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--muted);
 }
 
 .forecast-card .temp {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 900;
 }
 
 .forecast-card .type {
-    font-size: 0.8rem;
-    color: #94a3b8;
+    font-size: 0.7rem;
+    opacity: 0.6;
+    text-transform: uppercase;
+    font-weight: 800;
 }
 
+/* Empty State */
+.empty-state {
+    padding: 80px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.empty-state h3 {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.floating-icon {
+    animation: floatIcon 4s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0); }
+}
+
+/* Loader & Error */
 .loader-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 10000;
 }
 
 .loader {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #4facfe;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -294,35 +249,29 @@
 
 .error-toast {
     position: fixed;
-    bottom: 20px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(239, 68, 68, 0.2);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: #ff5252;
+    color: #fff;
     padding: 12px 24px;
     border-radius: 12px;
-    color: #fca5a5;
-    z-index: 2000;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(255, 82, 82, 0.4);
+    z-index: 10000;
 }
 
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 0;
-    color: #64748b;
-    text-align: center;
+@media (max-width: 900px) {
+    .forecast-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
-.floating-icon {
-    margin-bottom: 24px;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-    100% { transform: translateY(0); }
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .forecast-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

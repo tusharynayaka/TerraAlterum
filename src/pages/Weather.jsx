@@ -10,7 +10,6 @@ import {
   Sun, 
   CloudRain, 
   CloudLightning,
-  Navigation,
   Calendar,
   CloudSnow
 } from 'lucide-react';
@@ -24,6 +23,11 @@ const Weather = () => {
     const [forecast, setForecast] = useState([]);
     
     const apiKey = 'e15ee20095f1ca448fd5782b1d106790';
+
+    useEffect(() => {
+        // Auto-fetch local weather on mount
+        handleLocation();
+    }, []);
 
     const fetchWeather = async (url) => {
         setLoading(true);
@@ -57,9 +61,15 @@ const Weather = () => {
                 const { latitude, longitude } = position.coords;
                 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
                 fetchWeather(url);
-            }, () => setError('Location access denied'));
-        } else {
-            setError('Geolocation not supported');
+            }, () => {
+                // Fallback to IP location
+                fetch('https://ipapi.co/json/')
+                    .then(r => r.json())
+                    .then(data => {
+                        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${data.latitude}&lon=${data.longitude}&appid=${apiKey}&units=metric`;
+                        fetchWeather(url);
+                    });
+            });
         }
     };
 
@@ -86,47 +96,28 @@ const Weather = () => {
 
     return (
         <div className="weather-page">
-            {/* Animated Blobs */}
-            <div className="blobs">
-                <motion.div 
-                    animate={{ x: [0, 100, 0], y: [0, 50, 0] }}
-                    transition={{ duration: 20, repeat: Infinity }}
-                    className="blob blob-1" 
-                />
-                <motion.div 
-                    animate={{ x: [0, -80, 0], y: [0, 100, 0] }}
-                    transition={{ duration: 15, repeat: Infinity, delay: 2 }}
-                    className="blob blob-2" 
-                />
-                <motion.div 
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 18, repeat: Infinity }}
-                    className="blob blob-3" 
-                />
-            </div>
-
             <div className="weather-container">
                 <header className="weather-header">
                     <motion.div 
-                        initial={{ x: -50, opacity: 0 }}
+                        initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         className="logo-area"
                     >
                         <div className="weather-logo-icon">🌤️</div>
-                        <h1>WeatherCast</h1>
+                        <h1>Atmospheric Intel</h1>
                     </motion.div>
 
                     <form className="search-form" onSubmit={handleSearch}>
-                        <div className="search-input-wrapper">
+                        <div className="search-input-wrapper glass-simple">
                             <Search className="search-icon" size={18} />
                             <input 
                                 type="text" 
-                                placeholder="Search city..." 
+                                placeholder="Search geographical zone..." 
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
                             />
                         </div>
-                        <button type="submit" className="glass-btn">Search</button>
+                        <button type="submit" className="glass-btn">Scan</button>
                         <button type="button" className="glass-btn icon-btn" onClick={handleLocation}>
                             <MapPin size={20} />
                         </button>
@@ -145,7 +136,7 @@ const Weather = () => {
                             >
                                 <div className="card-top">
                                     <div className="location-info">
-                                        <h2>{weatherData.name}, {weatherData.sys.country}</h2>
+                                        <h2>{weatherData.name}, <span className="text-accent">{weatherData.sys.country}</span></h2>
                                         <p className="condition">{weatherData.weather[0].description}</p>
                                     </div>
                                     <div className="main-temp">
@@ -154,22 +145,22 @@ const Weather = () => {
                                 </div>
 
                                 <div className="stats-grid">
-                                    <div className="stat-item">
-                                        <Thermometer size={20} />
+                                    <div className="stat-item glass-simple">
+                                        <Thermometer size={20} className="text-accent" />
                                         <div className="stat-val">
                                             <span>Feels Like</span>
                                             <strong>{Math.round(weatherData.main.feels_like)}°</strong>
                                         </div>
                                     </div>
-                                    <div className="stat-item">
-                                        <Droplets size={20} />
+                                    <div className="stat-item glass-simple">
+                                        <Droplets size={20} className="text-accent" />
                                         <div className="stat-val">
                                             <span>Humidity</span>
                                             <strong>{weatherData.main.humidity}%</strong>
                                         </div>
                                     </div>
-                                    <div className="stat-item">
-                                        <Wind size={20} />
+                                    <div className="stat-item glass-simple">
+                                        <Wind size={20} className="text-accent" />
                                         <div className="stat-val">
                                             <span>Wind Speed</span>
                                             <strong>{weatherData.wind.speed} m/s</strong>
@@ -182,10 +173,10 @@ const Weather = () => {
                                 key="empty"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="empty-state"
+                                className="empty-state glass-premium"
                             >
-                                <Cloud size={64} className="floating-icon" />
-                                <h3>Enter a city to explore weather</h3>
+                                <Cloud size={64} className="floating-icon text-accent" />
+                                <h3>Select a sector to analyze atmospheric conditions</h3>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -193,8 +184,8 @@ const Weather = () => {
                     {weatherData && (
                         <div className="forecast-section">
                             <div className="section-title">
-                                <Calendar size={18} />
-                                <h3>5-Day Forecast</h3>
+                                <Calendar size={18} className="text-accent" />
+                                <h3>5-Day Projection</h3>
                             </div>
                             <div className="forecast-grid">
                                 {forecast.map((f, i) => (

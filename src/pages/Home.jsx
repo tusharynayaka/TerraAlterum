@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, 
   Globe, 
@@ -9,160 +9,145 @@ import {
   Bell, 
   ArrowRight,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  MapPin,
+  AlertTriangle,
+  Wind,
+  Thermometer,
+  CloudRain
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
-    const features = [
-        { 
-            icon: <Globe className="text-blue-400" />, 
-            title: "3D Globe Explorer", 
-            desc: "Visualize real-time disaster alerts and weather patterns on an interactive high-resolution globe." 
-        },
-        { 
-            icon: <Cpu className="text-purple-400" />, 
-            title: "AI Risk Prediction", 
-            desc: "Advanced ML models analyzing environmental metrics to predict disasters with up to 94% accuracy." 
-        },
-        { 
-            icon: <Activity className="text-red-400" />, 
-            title: "Live Simulations", 
-            desc: "Test emergency protocols in our physics-based disaster simulator with integrated alert systems." 
-        }
-    ];
+    const [location, setLocation] = useState({ city: 'Loading...', country: '' });
+    const [weather, setWeather] = useState(null);
+    const [earthquakes, setEarthquakes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const WEATHER_API_KEY = 'e15ee20095f1ca448fd5782b1d106790';
+
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                // 1. Get Location
+                const locRes = await fetch('https://ipapi.co/json/');
+                const locData = await locRes.json();
+                setLocation({ city: locData.city, country: locData.country_name });
+
+                // 2. Get Weather
+                if (locData.latitude && locData.longitude) {
+                    const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${locData.latitude}&lon=${locData.longitude}&appid=${WEATHER_API_KEY}&units=metric`);
+                    const weatherData = await weatherRes.json();
+                    setWeather(weatherData);
+                }
+
+                // 3. Get Earthquakes (Last 24h)
+                const eqRes = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson');
+                const eqData = await eqRes.json();
+                setEarthquakes(eqData.features.slice(0, 5)); // Top 5 recent
+            } catch (err) {
+                console.error("Error fetching live data:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInitialData();
+    }, []);
 
     return (
         <div className="home-page">
-            {/* Hero Section */}
-            <section className="hero">
-                <div className="hero-content">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="hero-badge"
-                    >
+            {/* Real-Time Dashboard Header */}
+            <div className="dashboard-grid">
+                <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="location-card glass-premium"
+                >
+                    <div className="card-lbl"><MapPin size={14} /> Global Station</div>
+                    <h2>{location.city}, <span className="text-accent">{location.country}</span></h2>
+                    {weather && (
+                        <div className="weather-tiny">
+                            <span className="temp">{Math.round(weather.main.temp)}°C</span>
+                            <span className="desc">{weather.weather[0].main}</span>
+                            <div className="w-icons">
+                                <Thermometer size={14} /> <Wind size={14} /> <CloudRain size={14} />
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="hero-header"
+                >
+                    <div className="hero-badge">
                         <Shield size={14} />
-                        <span>Next-Gen Disaster Intelligence</span>
-                    </motion.div>
-                    
-                    <motion.h1 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        Protecting Our Planet through <br/>
-                        <span>AI & Real-Time Visualization</span>
-                    </motion.h1>
-
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        TerraAlertum combines advanced machine learning with immersive 3D simulation 
-                        to provide early warnings and strategic insights for global disaster management.
-                    </motion.p>
-
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="hero-btns"
-                    >
-                        <Link to="/globe" className="btn-primary">
-                            Launch Explorer <ArrowRight size={18} />
-                        </Link>
-                        <Link to="/simulation" className="btn-secondary">
-                            Live Simulation
-                        </Link>
-                    </motion.div>
-                </div>
-
-                {/* Hero Decoration */}
-                <div className="hero-visual">
-                    <div className="sphere-glow"></div>
-                    <motion.div 
-                        animate={{ 
-                            rotate: 360,
-                            scale: [1, 1.05, 1]
-                        }}
-                        transition={{ 
-                            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                            scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-                        }}
-                        className="sphere-wrap"
-                    >
-                        <Globe size={300} strokeWidth={0.5} className="hero-globe-svg" />
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* Statistics Section */}
-            <section className="stats-strip">
-                <div className="stat-card">
-                    <strong>94.2%</strong>
-                    <span>ML Accuracy</span>
-                </div>
-                <div className="stat-card">
-                    <strong>150+</strong>
-                    <span>Countries Tracked</span>
-                </div>
-                <div className="stat-card">
-                    <strong>2s</strong>
-                    <span>Alert Latency</span>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section className="features">
-                <div className="section-head">
-                    <h2>Powerful Tools for Resilience</h2>
-                    <p>Designed for government agencies and emergency responders worldwide.</p>
-                </div>
-
-                <div className="features-grid">
-                    {features.map((f, i) => (
-                        <motion.div 
-                            key={i}
-                            whileHover={{ y: -10 }}
-                            className="feature-card glass-premium"
-                        >
-                            <div className="f-icon">{f.icon}</div>
-                            <h3>{f.title}</h3>
-                            <p>{f.desc}</p>
-                            <Link to={i === 0 ? "/globe" : i === 1 ? "/ml" : "/simulation"} className="f-link">
-                                Learn More <ChevronRight size={14} />
-                            </Link>
-                        </motion.div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Trust Section */}
-            <section className="trust-section">
-                <div className="trust-content glass-premium">
-                    <div className="trust-text">
-                        <h2>Trusted by Global Response Teams</h2>
-                        <ul className="check-list">
-                            <li><CheckCircle2 size={18} className="text-blue-400" /> End-to-end multi-channel alert systems</li>
-                            <li><CheckCircle2 size={18} className="text-blue-400" /> Real-time environmental sensor integration</li>
-                            <li><CheckCircle2 size={18} className="text-blue-400" /> Physics-based disaster event modeling</li>
-                        </ul>
+                        <span>Real-Time Intelligence Active</span>
                     </div>
-                    <div className="trust-image">
-                        <Zap size={100} className="text-blue-400 opacity-20" />
+                    <h1>TerraAlertum</h1>
+                    <p>Monitoring global stability through AI & live satellite telemetry.</p>
+                </motion.div>
+
+                <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="alert-feed glass-premium"
+                >
+                    <div className="card-lbl"><AlertTriangle size={14} /> Live Seismic Feed</div>
+                    <div className="feed-items">
+                        {earthquakes.map((eq, i) => (
+                            <div key={i} className="feed-item">
+                                <span className={`mag ${eq.properties.mag > 5 ? 'high' : ''}`}>M{eq.properties.mag}</span>
+                                <span className="place">{eq.properties.place.split('of').pop()}</span>
+                            </div>
+                        ))}
                     </div>
+                    <Link to="/globe" className="view-more">Analyze All Earthquakes <ArrowRight size={14} /></Link>
+                </motion.div>
+            </div>
+
+            {/* Main Action Section */}
+            <section className="main-actions">
+                <div className="action-grid">
+                    <motion.div whileHover={{ y: -10 }} className="action-card glass-premium">
+                        <div className="a-icon"><Globe size={32} /></div>
+                        <h3>Globe Explorer</h3>
+                        <p>View real-time disaster alerts on an interactive 3D planet model.</p>
+                        <Link to="/globe" className="btn-primary">Launch Station</Link>
+                    </motion.div>
+
+                    <motion.div whileHover={{ y: -10 }} className="action-card glass-premium">
+                        <div className="a-icon"><Activity size={32} /></div>
+                        <h3>Disaster Simulation</h3>
+                        <p>Simulate flood response, seismic impact, and atmospheric changes.</p>
+                        <Link to="/simulation" className="btn-secondary">Start Simulation</Link>
+                    </motion.div>
+
+                    <motion.div whileHover={{ y: -10 }} className="action-card glass-premium">
+                        <div className="a-icon"><Cpu size={32} /></div>
+                        <h3>ML Predictions</h3>
+                        <p>High-accuracy risk assessment using trained neural architectures.</p>
+                        <Link to="/ml" className="btn-secondary">View Insights</Link>
+                    </motion.div>
                 </div>
             </section>
 
-            {/* Footer CTA */}
-            <section className="cta-footer">
-                <div className="cta-box glass-premium">
-                    <h2>Ready to build a safer world?</h2>
-                    <p>Contact our development team for custom integration or partnership inquiries.</p>
-                    <Link to="/contact" className="btn-primary">Get in Touch</Link>
+            {/* Global Stats Counter */}
+            <section className="global-pulse glass-premium">
+                <div className="pulse-item">
+                    <strong className="text-accent">94.2%</strong>
+                    <span>Prediction Accuracy</span>
+                </div>
+                <div className="pulse-item">
+                    <strong className="text-accent">2s</strong>
+                    <span>Live Latency</span>
+                </div>
+                <div className="pulse-item">
+                    <strong className="text-accent">24/7</strong>
+                    <span>Active Monitoring</span>
                 </div>
             </section>
         </div>

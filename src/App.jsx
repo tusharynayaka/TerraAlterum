@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
+import BackgroundEffects from './components/BackgroundEffects';
 import Home from './pages/Home';
 import GlobeExplorer from './pages/GlobeExplorer';
 import Simulation from './pages/Simulation';
@@ -12,6 +13,7 @@ import './App.css';
 const App = () => {
   return (
     <div className="app-container">
+      <BackgroundEffects />
       <Navigation />
       <div className="main-content">
         <Routes>
