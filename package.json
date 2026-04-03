@@ -1,6 +1,7 @@
 {
   "name": "terra-alertum",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.30.0",
   "description": "Disaster Alert System with 3D Globe and ML Simulation",
   "type": "module",
   "scripts": {
