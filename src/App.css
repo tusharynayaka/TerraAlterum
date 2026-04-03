@@ -1,0 +1,36 @@
+.app-container {
+  width: 100vw;
+  min-height: 100vh;
+  background: #0f172a;
+  color: #f8fafc;
+  overflow-x: hidden;
+}
+
+.main-content {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Ensure pages that aren't full-screen (like Home, Weather, Contact) have top padding */
+/* Pages like Globe and Simulation are full-screen and might handle their own internal padding or overlays */
+.home-page, .weather-page, .ml-page, .contact-page {
+  padding-top: 80px; 
+}
+
+/* Global scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}

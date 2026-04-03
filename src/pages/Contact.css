@@ -1,0 +1,189 @@
+.contact-page {
+    position: relative;
+    width: 100vw;
+    min-height: 100vh;
+    background: #0f172a;
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+    padding: 60px 20px;
+    overflow: hidden;
+}
+
+/* Blobs */
+.blobs {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.blob {
+    position: absolute;
+    width: 500px; height: 500px;
+    filter: blur(100px);
+    opacity: 0.2;
+}
+
+.blob-purple { background: #764ba2; bottom: -100px; left: -100px; }
+.blob-blue { background: #4facfe; top: -100px; right: -100px; }
+
+.contact-container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.badge {
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contact-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 16px 0;
+}
+
+.contact-header p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 32px;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.contact-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+}
+
+.info-items {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.icon-wrapper {
+    width: 44px;
+    height: 44px;
+    background: rgba(79, 172, 254, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4facfe;
+}
+
+.info-item .text {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-item .text span {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.info-item .text strong {
+    font-size: 0.95rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+}
+
+.social-links a {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    transition: all 0.3s;
+}
+
+.social-links a:hover {
+    background: #4facfe;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.contact-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.gmail-box h2 {
+    font-size: 1.5rem;
+    margin: 20px 0 12px 0;
+}
+
+.gmail-box p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+}
+
+.gmail-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.gmail-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.5);
+    filter: brightness(1.1);
+}
+
+.ext-icon { opacity: 0.5; }

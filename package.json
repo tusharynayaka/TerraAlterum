@@ -1,0 +1,30 @@
+{
+  "name": "terra-alertum",
+  "version": "1.0.0",
+  "description": "Disaster Alert System with 3D Globe and ML Simulation",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "backend": "python app.py"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.0.0",
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.469.0",
+    "chart.js": "^4.4.7",
+    "react-chartjs-2": "^5.2.0",
+    "three": "^0.171.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0"
+  }
+}

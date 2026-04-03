@@ -1,0 +1,38 @@
+{
+    "apiKeys": {
+        "openWeather": "e15ee20095f1ca448fd5782b1d106790",
+        "emailJs": "uWUiIqFrXaV28B4zw",
+        "emailJsService": "service_mg92uqi",
+        "emailJsTemplate": "template_zuayo4q"
+    },
+    "navigation": [
+        {
+            "label": "🏠 Home",
+            "link": "/2.html"
+        },
+        {
+            "label": "🌍 Globe Explorer",
+            "link": "/globe.html"
+        },
+        {
+            "label": "🌦️ Weather",
+            "link": "/open.html"
+        },
+        {
+            "label": "🤖 ML Insights",
+            "link": "/ML.html"
+        },
+        {
+            "label": "🚀 Simulation",
+            "link": "/index.html"
+        },
+        {
+            "label": "📞 Contact",
+            "link": "/Contact.html"
+        }
+    ],
+    "links": {
+        "logout": "/fin.html",
+        "startExploring": "/globe.html"
+    }
+}
